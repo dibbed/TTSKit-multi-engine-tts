@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+
+# Virtual env
+.venv/
+venv/
+ENV/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+.eggs/
+.coverage*
+htmlcov/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env
+.env
+.env.*
+!.env.example
+
+# Logs & temp
+logs/
+*.log
+tmp/
+*.tmp
+
+# Runtime data (keep repo clean)
+data/sessions/
+data/*.db
+
+# Cache
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Docker
+*.pid

@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  ttskit:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - BOT_TOKEN=${BOT_TOKEN:-}
+      - TTSKIT_DEFAULT_LANG=${TTSKIT_DEFAULT_LANG:-en}
+      - TTSKIT_CACHE_ENABLED=${TTSKIT_CACHE_ENABLED:-true}
+      - TTSKIT_RATE_LIMITING=${TTSKIT_RATE_LIMITING:-true}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379/0}
+    depends_on:
+      - redis
+    command: ["ttskit", "run-bot"]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "from ttskit import synth; synth('سلام', 'fa', output_format='ogg')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  ttskit-api:
+    build: .
+    ports:
+      - "8081:8080"
+    environment:
+      - TTSKIT_DEFAULT_LANG=${TTSKIT_DEFAULT_LANG:-en}
+      - TTSKIT_CACHE_ENABLED=${TTSKIT_CACHE_ENABLED:-true}
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379/0}
+    depends_on:
+      - redis
+    command: ["python", "-m", "uvicorn", "ttskit.api.app:app", "--host", "0.0.0.0", "--port", "8080"]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  redis_data:

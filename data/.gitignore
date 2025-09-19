@@ -1,0 +1,24 @@
+# TTSKit Data Directory
+# This directory contains user data and should not be committed to version control
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Session files
+*.session
+*.session-journal
+
+# Audio cache files
+*.ogg
+*.mp3
+*.wav
+
+# Temporary files
+*.tmp
+*.temp
+
+# Keep directory structure
+!sessions/
+!.gitignore
