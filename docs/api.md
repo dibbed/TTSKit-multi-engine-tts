@@ -61,12 +61,12 @@ curl -H "Authorization: Bearer your-api-key" \
 Set your API key in environment variables:
 
 ```bash
-# Single API key (backward compatibility)
-export TTSKIT_API_KEY="your-secret-key"
-export TTSKIT_ENABLE_AUTH=true
+# Single API key
+export API_KEY="your-secret-key"
+export ENABLE_AUTH=true
 
-# Multiple API keys with permissions
-export TTSKIT_API_KEYS='{"admin": "admin-secret-key", "user1": "user1-key", "readonly_user": "readonly-key"}'
+# Multiple API keys with permissions (JSON)
+export API_KEYS='{"admin": "admin-secret-key", "user1": "user1-key", "readonly_user": "readonly-key"}'
 ```
 
 ### Permission Levels
@@ -101,7 +101,7 @@ Synthesize text to speech audio.
 
 **Parameters:**
 
-- `text` (required): Text to synthesize (1-5000 characters)
+- `text` (required): Text to synthesize (effective max: 1000 by default; configurable by `MAX_CHARS`)
 - `lang` (optional): Language code (default: "en")
 - `voice` (optional): Voice name (engine-specific)
 - `engine` (optional): TTS engine to use (auto-selected if not specified)
@@ -231,7 +231,7 @@ List all available engines.
       "ssml": false,
       "rate_control": true,
       "pitch_control": false,
-      "max_text_length": 5000
+      "max_text_length": 1000
     },
     "languages": ["en", "fa", "ar"],
     "voices": ["en_US-lessac-medium", "fa_IR-amir-medium"],
@@ -402,6 +402,8 @@ Get cache statistics.
 }
 ```
 
+Note: Values for `size` and `entries` may vary by cache backend; the in-memory backend may report `0` for these fields.
+
 #### POST `/api/v1/cache/clear`
 
 Clear cache.
@@ -440,7 +442,7 @@ Get supported audio formats.
 
 ```json
 {
-  "formats": ["ogg", "mp3", "wav"]
+  "formats": ["ogg", "mp3", "wav", "flac", "aac", "m4a"]
 }
 ```
 
@@ -454,7 +456,7 @@ Get supported language codes.
 
 ```json
 {
-  "languages": ["en", "fa", "ar", "es", "fr", "de"]
+  "languages": ["en", "fa", "ar", "es", "fr", "de", "it", "pt", "ru", "ja", "ko", "zh", "hi", "tr", "pl", "nl", "sv", "da", "no"]
 }
 ```
 
@@ -464,7 +466,17 @@ Get rate limit information.
 
 **Authentication:** Required
 
-**Response:** Current rate limit settings and usage statistics.
+**Response:** Current rate limit status for the authenticated user.
+
+```json
+{
+  "user_id": "anonymous",
+  "rate_limited": false,
+  "remaining_requests": 99,
+  "reset_time": null,
+  "message": "Request allowed. 99 requests remaining in this window."
+}
+```
 
 #### GET `/api/v1/documentation`
 
@@ -485,10 +497,10 @@ Get system metrics and performance data.
 ```json
 {
   "tts_stats": {
-    "total_synthesis": 1500,
-    "successful_synthesis": 1480,
-    "failed_synthesis": 20,
-    "average_duration": 2.5
+    "total_requests": 1500,
+    "successful_requests": 1480,
+    "failed_requests": 20,
+    "success_rate": 0.986
   },
   "system_metrics": {
     "cpu_percent": 15.2,
@@ -497,7 +509,26 @@ Get system metrics and performance data.
     "process_count": 25,
     "uptime": 86400.5
   },
-  "version": "0.1.0"
+  "version": "1.0.0"
+}
+```
+
+#### GET `/api/v1/advanced-metrics`
+
+Get comprehensive advanced metrics.
+
+**Authentication:** Required
+
+**Response:**
+
+```json
+{
+  "comprehensive": { /* high-level aggregated metrics */ },
+  "engine_comparison": { /* per-engine comparisons */ },
+  "language_analytics": { /* usage by language */ },
+  "performance": { /* performance monitor metrics */ },
+  "timestamp": 1700000000,
+  "version": "1.0.0"
 }
 ```
 
@@ -520,96 +551,119 @@ Get version information.
 
 ### Admin Endpoints
 
-#### GET `/api/v1/admin/api-keys`
+#### Users (admin)
 
-List all API keys (admin only).
+These endpoints require admin permission.
 
-**Authentication:** Required (admin permission)
+- GET `/api/v1/admin/users`: List users.
 
-**Response:**
+  Response example:
+  ```json
+  [
+    {
+      "user_id": "admin",
+      "username": "Administrator",
+      "email": null,
+      "is_active": true,
+      "is_admin": true,
+      "created_at": "2025-01-01T00:00:00Z",
+      "last_login": null
+    }
+  ]
+  ```
 
-```json
-{
-  "admin": {
-    "user_id": "admin",
-    "permissions": ["read", "write", "admin"],
-    "created_at": "unknown"
-  },
-  "user1": {
-    "user_id": "user1",
-    "permissions": ["read", "write"],
-    "created_at": "unknown"
+- POST `/api/v1/admin/users`: Create user.
+
+  Request body:
+  ```json
+  {
+    "user_id": "new_user",
+    "username": "New User",
+    "email": "new@example.com",
+    "is_admin": false
   }
-}
-```
+  ```
 
-#### POST `/api/v1/admin/api-keys`
+- GET `/api/v1/admin/users/{user_id}`: Get user by ID.
 
-Create a new API key (admin only).
+- DELETE `/api/v1/admin/users/{user_id}`: Delete user (cannot delete `admin`).
 
-**Authentication:** Required (admin permission)
+#### API Keys (admin)
 
-**Request Body:**
+- GET `/api/v1/admin/api-keys`: List all API keys.
 
-```json
-{
-  "user_id": "new_user",
-  "api_key": "new-secret-key",
-  "permissions": ["read", "write"]
-}
-```
+  Response example:
+  ```json
+  [
+    {
+      "id": 1,
+      "user_id": "admin",
+      "api_key_plain": "***hidden***",
+      "permissions": ["read", "write", "admin"],
+      "is_active": true,
+      "created_at": "2025-01-01T00:00:00Z",
+      "last_used": null,
+      "expires_at": null,
+      "usage_count": 0
+    }
+  ]
+  ```
 
-**Response:**
+- POST `/api/v1/admin/api-keys`: Create a new API key.
 
-```json
-{
-  "message": "API key created successfully for user 'new_user'",
-  "user_id": "new_user",
-  "permissions": ["read", "write"],
-  "note": "In production, store this securely in a database"
-}
-```
+  Request body:
+  ```json
+  {
+    "user_id": "new_user",
+    "permissions": ["read", "write"],
+    "expires_at": "2025-12-31T00:00:00Z"
+  }
+  ```
 
-#### PUT `/api/v1/admin/api-keys/{user_id}`
+  Response example:
+  ```json
+  {
+    "id": 10,
+    "user_id": "new_user",
+    "api_key": "ttskit_xxx...",
+    "permissions": ["read", "write"],
+    "created_at": "2025-01-01T00:00:00Z",
+    "expires_at": null
+  }
+  ```
 
-Update an existing API key (admin only).
+- PUT `/api/v1/admin/api-keys/{user_id}`: Update first key for a user.
 
-**Authentication:** Required (admin permission)
+  Request body:
+  ```json
+  {
+    "permissions": ["read", "write", "admin"],
+    "is_active": true,
+    "expires_at": "2025-12-31T00:00:00Z"
+  }
+  ```
 
-**Request Body:**
+  Response example:
+  ```json
+  {
+    "id": 10,
+    "user_id": "user1",
+    "api_key_plain": "***hidden***",
+    "permissions": ["read", "write", "admin"],
+    "is_active": true,
+    "created_at": "2025-01-01T00:00:00Z",
+    "last_used": null,
+    "expires_at": null,
+    "usage_count": 0
+  }
+  ```
 
-```json
-{
-  "api_key": "updated-secret-key",
-  "permissions": ["read", "write", "admin"]
-}
-```
+- DELETE `/api/v1/admin/api-keys/{user_id}`: Delete first key for a user.
 
-**Response:**
-
-```json
-{
-  "message": "API key updated successfully for user 'user1'",
-  "user_id": "user1",
-  "permissions": ["read", "write", "admin"],
-  "note": "In production, update this securely in a database"
-}
-```
-
-#### DELETE `/api/v1/admin/api-keys/{user_id}`
-
-Delete an API key (admin only).
-
-**Authentication:** Required (admin permission)
-
-**Response:**
-
-```json
-{
-  "message": "API key deleted successfully for user 'user1'",
-  "note": "In production, remove this securely from database"
-}
-```
+  Response:
+  ```json
+  { "message": "API key deleted successfully for user 'user1'" }
+  ```
 
 #### GET `/api/v1/admin/users/me`
 
@@ -719,58 +773,52 @@ ttskit api --host 0.0.0.0 --port 8000 --header "X-API-Version: v1" --header "X-C
 
 ```bash
 # API Configuration
-TTSKIT_API_KEY=your-secret-key
-TTSKIT_ENABLE_AUTH=true
-TTSKIT_API_RATE_LIMIT=100
-TTSKIT_CORS_ORIGINS=["*"]
-TTSKIT_ALLOWED_HOSTS=["*"]
+API_KEY=your-secret-key
+ENABLE_AUTH=true
+API_RATE_LIMIT=100
+CORS_ORIGINS=["*"]
+ALLOWED_HOSTS=["*"]
 
 # Multiple API Keys (JSON format)
-TTSKIT_API_KEYS='{"admin": "admin-secret-key", "user1": "user1-key", "readonly_user": "readonly-key"}'
+API_KEYS='{"admin": "admin-secret-key", "user1": "user1-key", "readonly_user": "readonly-key"}'
 
 # TTS Configuration
-TTSKIT_DEFAULT_LANG=en
-TTSKIT_MAX_CHARS=1000
-TTSKIT_MAX_TEXT_LENGTH=1000
-TTSKIT_TTS_DEFAULT=edge
+DEFAULT_LANG=en
+MAX_CHARS=1000
+MAX_TEXT_LENGTH=1000
+TTS_DEFAULT=edge
 
 # Cache Configuration
-TTSKIT_CACHE_ENABLED=true
-TTSKIT_CACHE_TTL=3600
-TTSKIT_CACHE_TYPE=memory
-
-# Redis Configuration (optional)
-TTSKIT_REDIS_URL=redis://localhost:6379
-TTSKIT_REDIS_DB=0
-TTSKIT_REDIS_PASSWORD=
+CACHE_ENABLED=true
+CACHE_TTL=3600
+REDIS_URL=redis://localhost:6379/0
 
 # Logging Configuration
-TTSKIT_LOG_LEVEL=INFO
-TTSKIT_LOG_FORMAT=json
-TTSKIT_LOG_FILE=logs/ttskit.log
+LOG_LEVEL=INFO
 
-# Performance Configuration
-TTSKIT_MAX_WORKERS=4
-TTSKIT_TIMEOUT=30
+# API Server
+API_HOST=0.0.0.0
+API_PORT=8000
+API_TIMEOUT=15.0
 ```
 
 ### Security Settings
 
 ```bash
 # Enable authentication
-TTSKIT_ENABLE_AUTH=true
+ENABLE_AUTH=true
 
 # Set API key
-TTSKIT_API_KEY=your-secret-key
+API_KEY=your-secret-key
 
 # Configure CORS
-TTSKIT_CORS_ORIGINS=["https://yourdomain.com"]
+CORS_ORIGINS=["https://yourdomain.com"]
 
 # Configure allowed hosts
-TTSKIT_ALLOWED_HOSTS=["yourdomain.com", "api.yourdomain.com"]
+ALLOWED_HOSTS=["yourdomain.com", "api.yourdomain.com"]
 
 # Rate limiting
-TTSKIT_API_RATE_LIMIT=100  # requests per minute
+API_RATE_LIMIT=100  # requests per minute
 ```
 
 ## Error Handling
@@ -790,13 +838,20 @@ The API returns standard HTTP status codes:
 
 ### Error Response Format
 
-```json
-{
-  "detail": "Error message",
-  "error_type": "validation_error",
-  "request_id": "12345"
-}
-```
+- Validation errors (422):
+  ```json
+  {
+    "detail": "Validation error: ..."
+  }
+  ```
+- Internal errors (500):
+  ```json
+  {
+    "error": "Internal server error",
+    "message": "An unexpected error occurred",
+    "request_id": 12345678
+  }
+  ```
 
 ### Common Error Scenarios
 
@@ -844,27 +899,23 @@ The API returns standard HTTP status codes:
 
 The API implements rate limiting to prevent abuse:
 
-- **Default**: 100 requests per minute per IP address
-- **Configurable**: Via `TTSKIT_API_RATE_LIMIT` environment variable
+- **Default**: 100 requests per minute per IP address (configurable via `API_RATE_LIMIT`)
+- **Configurable**: Via `API_RATE_LIMIT` environment variable
 - **Window**: 60 seconds rolling window
 - **Scope**: Per client IP address
-- **Headers**: Rate limit information included in responses:
-  - `X-RateLimit-Limit`: Maximum requests per window
-  - `X-RateLimit-Remaining`: Remaining requests in current window
-  - `X-RateLimit-Reset`: Time when the rate limit resets
-  - `Retry-After`: Seconds to wait before retrying (on 429 error)
+- **Headers**: On 429 errors, a `Retry-After` header indicates seconds to wait.
 
 ### Rate Limit Information Endpoint
 
-Use `/api/v1/rate-limit` to get current rate limit settings and usage statistics.
+Use `/api/v1/rate-limit` to get current status and remaining allowance for your key.
 
 ## Caching
 
 The API uses intelligent caching for improved performance:
 
-- **Cache Key**: Based on text, language, engine, voice, rate, pitch, and format
+- **Cache Key**: Based on text, language, and engine
 - **Cache Types**: Memory cache (default) or Redis cache
-- **TTL**: Configurable via `TTSKIT_CACHE_TTL` (default: 3600 seconds)
+- **TTL**: Configurable via `CACHE_TTL` (default: 3600 seconds)
 - **Statistics**: Available via `/api/v1/cache/stats`
 - **Management**: Cache can be cleared via `/api/v1/cache/clear`
 - **Status**: Check if cache is enabled via `/api/v1/cache/enabled`
@@ -873,17 +924,13 @@ The API uses intelligent caching for improved performance:
 
 ```bash
 # Enable/disable caching
-TTSKIT_CACHE_ENABLED=true
+CACHE_ENABLED=true
 
 # Cache TTL in seconds
-TTSKIT_CACHE_TTL=3600
-
-# Cache type (memory or redis)
-TTSKIT_CACHE_TYPE=memory
+CACHE_TTL=3600
 
 # Redis configuration (if using Redis cache)
-TTSKIT_REDIS_URL=redis://localhost:6379
-TTSKIT_REDIS_DB=0
+REDIS_URL=redis://localhost:6379/0
 ```
 
 ## Monitoring
@@ -897,18 +944,17 @@ TTSKIT_REDIS_DB=0
 ### Metrics
 
 - **`/api/v1/metrics`**: System metrics and performance data
+- **`/api/v1/advanced-metrics`**: Comprehensive performance analytics
 - **`/api/v1/cache/stats`**: Cache performance statistics
 - **`/api/v1/rate-limit`**: Rate limiting information and usage
 
 ### Logging
 
-All API requests are logged with comprehensive information:
+All API requests are logged:
 
-- **Request Details**: Method, URL, client IP, user agent
-- **Response Details**: Status code, processing time, response size
-- **Authentication**: User ID and permissions (if authenticated)
-- **Error Details**: Full error information and stack traces
-- **Performance**: Request timing and system metrics
+- **Request**: Method, path, client IP, user agent
+- **Response**: Status code, processing time (`X-Process-Time`)
+- **Security Headers**: Added to every response
 
 ### Security Headers
 
@@ -923,6 +969,8 @@ All responses include security headers:
 - `X-API-Version`: API version
 - `X-Service`: Service name
 - `X-Process-Time`: Request processing time
+
+Note: `X-API-Version` is set to `1.0.0` and `X-Service` to `TTSKit`.
 
 ## Examples
 
@@ -1119,5 +1167,5 @@ For issues and questions:
 - **Text Length**: Maximum 1000 characters per request (configurable)
 - **Batch Size**: Maximum 10 texts per batch request
 - **Rate Limit**: 100 requests per minute per IP (configurable)
-- **Audio Formats**: ogg, mp3, wav
-- **Supported Languages**: en, fa, ar, es, fr, de (varies by engine)
+- **Audio Formats**: ogg, mp3, wav, flac, aac, m4a
+- **Supported Languages**: en, fa, ar, es, fr, de, it, pt, ru, ja, ko, zh, hi, tr, pl, nl, sv, da, no (varies by engine)
