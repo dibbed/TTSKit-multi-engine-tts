@@ -488,7 +488,7 @@ class UserService:
 
             api_key = await self.get_api_key_by_hash(api_key_hash)
             if not api_key:
-                logger.warning(f"Invalid API key attempted: {api_key_plain[:10]}...")
+                logger.warning("Invalid API key attempted (key not found)")
                 return None
 
             if not api_key.is_valid():

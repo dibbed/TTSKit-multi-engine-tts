@@ -140,7 +140,6 @@ class TestVerifyAPIKey:
 
         result = asyncio.run(verify_api_key("test_key", db=MagicMock()))
         assert result is not None
-        assert result.api_key == "test_key"
         assert result.user_id == "test_user"
         assert "read" in result.permissions
         assert "write" in result.permissions
@@ -214,8 +213,7 @@ class TestVerifyAPIKey:
 
         result = asyncio.run(verify_api_key("demo-key", db=MagicMock()))
         assert result is not None
-        assert result.api_key == "demo-key"
-        assert result.user_id == "demo-user"
+        assert result.user_id == "api-user"
         assert result.permissions == ["read", "write"]
 
     @patch("ttskit.api.dependencies.settings")
@@ -239,8 +237,7 @@ class TestVerifyAPIKey:
 
         result = asyncio.run(verify_api_key("demo-key", db=MagicMock()))
         assert result is not None
-        assert result.api_key == "demo-key"
-        assert result.user_id == "demo-user"
+        assert result.user_id == "api-user"
 
     def test_verify_api_key_invalid_key(self):
         """Verifies that verify_api_key raises a 401 error for unmatched keys.

@@ -63,17 +63,28 @@ class Settings(BaseSettings):
     )
     tts_default: str = Field(default="edge", description="Default TTS engine")
 
-    api_key: str = Field(default="demo-key", description="API key for authentication")
+    api_key: str | None = Field(
+        default=None, description="API key for authentication"
+    )
     api_keys: dict[str, str] = Field(
-        default={"demo-user": "demo-key", "admin": "admin-secret"},
+        default_factory=dict,
         description="Dictionary of user_id -> api_key mappings",
     )
     api_rate_limit: int = Field(
         default=100, ge=1, le=10000, description="API rate limit per minute"
     )
-    cors_origins: list[str] = Field(default=["*"], description="CORS allowed origins")
+    cors_origins: list[str] = Field(
+        default=[
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+            "http://localhost:8080",
+            "http://127.0.0.1:8080",
+        ],
+        description="CORS allowed origins",
+    )
     allowed_hosts: list[str] = Field(
-        default=["*"], description="Allowed hosts for security"
+        default=["localhost", "127.0.0.1", "testserver"],
+        description="Allowed hosts for security",
     )
     enable_auth: bool = Field(default=False, description="Enable API authentication")
     default_engine: str = Field(default="edge", description="Default TTS engine")
@@ -331,10 +342,6 @@ class Settings(BaseSettings):
 
     sudo_users: str = Field(
         default="", description="Comma-separated list of admin user IDs"
-    )
-
-    test_bot_token: str = Field(
-        default="test_token", description="Bot token for testing purposes"
     )
 
     @property

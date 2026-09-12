@@ -28,7 +28,15 @@ class TestFastAPIApp:
 
     def test_app_routes_registration(self):
         """Test that all routers are properly registered."""
-        routes = [route.path for route in app.routes]
+        routes = []
+        for route in app.routes:
+            if hasattr(route, "path"):
+                routes.append(route.path)
+            elif hasattr(route, "original_router"):
+                prefix = getattr(getattr(route, "include_context", None), "prefix", "") or ""
+                for sub in route.original_router.routes:
+                    if hasattr(sub, "path"):
+                        routes.append(prefix + sub.path)
 
         assert "/" in routes
         assert "/health" in routes

@@ -37,12 +37,13 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["X-XSS-Protection"] = "1; mode=block"
-        response.headers["Strict-Transport-Security"] = (
-            "max-age=31536000; includeSubDomains"
-        )
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
         response.headers["Permissions-Policy"] = (
             "geolocation=(), microphone=(), camera=()"
+        )
+
+        response.headers["Strict-Transport-Security"] = (
+            "max-age=31536000; includeSubDomains"
         )
 
         response.headers["X-API-Version"] = "1.0.0"
@@ -88,9 +89,9 @@ class ErrorHandlingMiddleware(BaseHTTPMiddleware):
     """Middleware that catches unhandled exceptions and returns standardized error responses.
 
     This middleware wraps the entire request processing pipeline in a try-catch block,
-    ensuring that any unhandled exceptions are properly logged and a consistent
+    ensuring that any unhandled exceptions are properly logged with full traceback and a consistent
     JSON error response is returned to clients. This prevents raw stack traces
-    from being exposed and provides better error handling for production applications.
+    from being exposed while preserving server diagnostics.
     """
 
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
@@ -98,7 +99,7 @@ class ErrorHandlingMiddleware(BaseHTTPMiddleware):
             response = await call_next(request)
             return response
         except Exception as e:
-            logger.error(f"Unhandled error in {request.method} {request.url.path}: {e}")
+            logger.exception(f"Unhandled error in {request.method} {request.url.path}: {e}")
 
             from fastapi.responses import JSONResponse
 
@@ -119,12 +120,23 @@ def setup_cors_middleware(app):
     Args:
         app (FastAPI): The FastAPI application instance.
     """
+    origins = (
+        list(settings.cors_origins)
+        if hasattr(settings, "cors_origins") and settings.cors_origins
+        else [
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+            "http://localhost:8080",
+            "http://127.0.0.1:8080",
+        ]
+    )
+    # Disallow allow_credentials with wildcard origins to avoid browser rejection
+    allow_credentials = "*" not in origins
+
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=settings.cors_origins
-        if hasattr(settings, "cors_origins")
-        else ["*"],
-        allow_credentials=True,
+        allow_origins=origins,
+        allow_credentials=allow_credentials,
         allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         allow_headers=["*"],
         expose_headers=["X-Process-Time", "X-API-Version", "X-Service"],
