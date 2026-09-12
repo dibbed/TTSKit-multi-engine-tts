@@ -91,7 +91,7 @@ class TestTTSComprehensive:
         with patch("ttskit.public.engine_factory") as mock_factory:
             mock_factory.setup_registry.return_value = None
 
-            tts = TTS(default_lang="en")
+            TTS(default_lang="en")
 
             mock_factory.setup_registry.assert_called_once()
 
@@ -100,7 +100,7 @@ class TestTTSComprehensive:
         with patch("ttskit.public.engine_factory") as mock_factory:
             mock_factory.setup_registry.side_effect = Exception("Registration failed")
 
-            tts = TTS(default_lang="en")
+            TTS(default_lang="en")
 
             mock_factory.setup_registry.assert_called_once()
 
@@ -250,7 +250,7 @@ class TestTTSComprehensive:
             tts = TTS(default_lang="en")
             config = SynthConfig(text="Hello", engine="gtts", output_format="mp3")
 
-            result = await tts.synth_async(config)
+            await tts.synth_async(config)
 
             mock_engine.synth_async.assert_called_once_with(
                 text="Hello",
@@ -285,7 +285,7 @@ class TestTTSComprehensive:
             tts = TTS(default_lang="en")
             config = SynthConfig(text="Hello", engine="piper")
 
-            result = await tts.synth_async(config)
+            await tts.synth_async(config)
 
             mock_manager.process_audio.assert_called_once_with(
                 b"audio_data",
@@ -395,7 +395,7 @@ class TestTTSComprehensive:
         """Test TTS._try_fallback_engines when all engines fail."""
         with (
             patch("ttskit.public.engine_factory") as mock_factory,
-            patch("ttskit.public.audio_manager") as mock_manager,
+            patch("ttskit.public.audio_manager"),
         ):
             mock_engine = Mock()
             mock_engine.synth_async = AsyncMock(side_effect=Exception("Engine failed"))
@@ -431,7 +431,7 @@ class TestTTSComprehensive:
             tts = TTS(default_lang="en")
             config = SynthConfig(text="Hello", engine="gtts")
 
-            result = await tts._try_fallback_engines(config)
+            await tts._try_fallback_engines(config)
 
             assert mock_factory.get_engine.call_count == 1
             mock_factory.get_engine.assert_called_with("edge")
@@ -441,7 +441,7 @@ class TestTTSComprehensive:
         """Test TTS._try_fallback_engines when engine factory returns None."""
         with (
             patch("ttskit.public.engine_factory") as mock_factory,
-            patch("ttskit.public.audio_manager") as mock_manager,
+            patch("ttskit.public.audio_manager"),
         ):
             mock_factory.get_available_engines.return_value = ["edge"]
             mock_factory.get_engine.return_value = None
@@ -788,7 +788,7 @@ class TestUtilityFunctionsComprehensive:
         assert "caching" in examples
         assert "rate_limiting" in examples
 
-        for category, example_list in examples.items():
+        for _category, example_list in examples.items():
             assert isinstance(example_list, list)
             for example in example_list:
                 assert isinstance(example, str)

@@ -56,7 +56,7 @@ def get_cache(force_new: bool = False) -> CacheInterface:
         try:
             prefix = getattr(settings, "redis_key_prefix", None)
             dedicated = getattr(settings, "redis_dedicated_db", False)
-            kwargs = {}
+            kwargs: dict[str, Any] = {}
             if prefix and isinstance(prefix, str):
                 kwargs["key_prefix"] = prefix
             if isinstance(dedicated, bool):

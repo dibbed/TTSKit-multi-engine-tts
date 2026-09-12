@@ -41,13 +41,13 @@ def test_to_opus_ogg_and_info():
                     f.write(b"fake_ogg")
 
                 class _Result:
-                    def __enter__(self_inner):
-                        return self_inner
+                    def __enter__(self):
+                        return self
 
-                    def __exit__(self_inner, exc_type, exc, tb):
+                    def __exit__(self, exc_type, exc, tb):
                         return False
 
-                    def read(self_inner, *args, **kwargs):
+                    def read(self, *args, **kwargs):
                         return b""
 
                 return _Result()

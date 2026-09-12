@@ -161,11 +161,10 @@ class RedisCache(BaseCache):
 
         full_key = self._format_key(key)
         ttl_to_use = ttl if ttl is not None else self.default_ttl
-        result = client.set(full_key, value_to_store)
+        client.set(full_key, value_to_store)
         if ttl_to_use is not None:
             client.expire(full_key, ttl_to_use)
         self._record_set()
-        return result
 
     def delete(self, key: str) -> bool:
         """Delete value from Redis cache.

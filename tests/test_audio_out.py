@@ -349,7 +349,7 @@ class TestAudioOut:
 
     def test_audio_out_with_unicode_data(self):
         """Test AudioOut with unicode data (should work with bytes)."""
-        audio_data = "سلام".encode("utf-8")
+        audio_data = "سلام".encode()
         audio_out = AudioOut(data=audio_data, format="ogg", duration=1.0)
 
         assert audio_out.data == audio_data

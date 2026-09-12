@@ -132,7 +132,7 @@ class TestGetAudioInfoFinal:
             (b"\xff\xfb\x90\x00" + b"x" * 10000, "large"),
         ]
 
-        for data, size_desc in test_cases:
+        for data, _size_desc in test_cases:
             info = self.audio_manager.get_audio_info(data)
 
             # Bitrate should be calculated based on size and duration

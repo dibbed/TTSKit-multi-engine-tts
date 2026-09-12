@@ -277,7 +277,7 @@ class TestTempFileContextManager:
             with open(file_path, "w") as f:
                 f.write("Hello, World!")
 
-            with open(file_path, "r") as f:
+            with open(file_path) as f:
                 content = f.read()
 
             assert content == "Hello, World!"
@@ -344,9 +344,9 @@ class TestTempDirectoryContextManager:
             assert os.path.exists(file1)
             assert os.path.exists(file2)
 
-            with open(file1, "r") as f:
+            with open(file1) as f:
                 content1 = f.read()
-            with open(file2, "r") as f:
+            with open(file2) as f:
                 content2 = f.read()
 
             assert content1 == "Content 1"

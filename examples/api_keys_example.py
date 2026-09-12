@@ -9,7 +9,7 @@ import httpx
 
 class TTSKitAPIClient:
     """HTTP client for TTSKit API with multiple API key authentication support.
-    
+
     Provides methods for synthesis, user management, and admin operations
     with different permission levels based on API key configuration.
     """
@@ -18,7 +18,7 @@ class TTSKitAPIClient:
         self, base_url: str = "http://localhost:8000", api_key: str = "demo-key"
     ):
         """Initializes API client with authentication credentials.
-        
+
         Args:
             base_url: TTSKit API server base URL
             api_key: API key for authentication and authorization
@@ -32,11 +32,11 @@ class TTSKitAPIClient:
 
     async def synthesize(self, text: str, lang: str = "en") -> bytes:
         """Synthesizes text to speech using authenticated API access.
-        
+
         Args:
             text: Text to synthesize
             lang: Language code for synthesis
-            
+
         Returns:
             Raw audio data as bytes
         """
@@ -51,7 +51,7 @@ class TTSKitAPIClient:
 
     async def get_current_user(self) -> dict:
         """Retrieves current user information based on API key.
-        
+
         Returns:
             Dictionary with user ID, permissions, and account details
         """
@@ -65,10 +65,10 @@ class TTSKitAPIClient:
 
     async def list_api_keys(self) -> dict:
         """Lists all API keys in the system (requires admin permissions).
-        
+
         Returns:
             Dictionary with API key information and metadata
-            
+
         Raises:
             HTTPStatusError: If user lacks admin permissions (403)
         """
@@ -83,7 +83,7 @@ class TTSKitAPIClient:
 
 async def test_multiple_api_keys():
     """Tests different API keys with varying permission levels and access rights.
-    
+
     Demonstrates how different users (admin, regular, readonly) can access
     different API endpoints based on their key permissions. Shows synthesis
     access and admin function restrictions.
@@ -130,7 +130,7 @@ async def test_multiple_api_keys():
 
 async def test_environment_config():
     """Demonstrates environment variable configuration for API keys and settings.
-    
+
     Shows how to configure multiple API keys, authentication settings, and
     rate limits using environment variables or .env files.
     """
@@ -163,7 +163,7 @@ async def test_environment_config():
 
 async def main():
     """Runs API key examples and configuration demonstrations.
-    
+
     Executes multi-user API key testing and shows environment configuration
     options for TTSKit authentication and authorization setup.
     """

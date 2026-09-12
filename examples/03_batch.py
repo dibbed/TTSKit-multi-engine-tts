@@ -15,7 +15,7 @@ from ttskit import TTS, SynthConfig
 
 class BatchProcessor:
     """Handles batch processing of multiple TTS synthesis requests.
-    
+
     Manages concurrent synthesis operations with configurable limits to prevent
     resource exhaustion while maximizing throughput.
     """
@@ -264,7 +264,7 @@ def create_large_batch_requests(count: int = 100) -> list[dict[str, Any]]:
 
 async def test_batch_processing():
     """Demonstrates batch processing functionality with detailed performance metrics.
-    
+
     Creates test requests, processes them concurrently, and displays comprehensive
     statistics including success rates, timing, and individual results.
     """
@@ -304,7 +304,7 @@ async def test_batch_processing():
 
 async def test_large_batch():
     """Demonstrates large-scale batch processing with higher concurrency.
-    
+
     Tests system performance with 50 requests processed with increased
     concurrency limits to show scalability characteristics.
     """
@@ -351,7 +351,7 @@ def save_results_to_file(results: dict[str, Any], filename: str):
 
 async def main():
     """Runs comprehensive batch processing examples and demonstrations.
-    
+
     Creates output directory, executes small and large batch tests,
     and displays completion summary.
     """

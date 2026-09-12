@@ -1,6 +1,5 @@
 """Tests for ProcessLifecycleManager in ttskit.services.lifecycle."""
 
-import asyncio
 from unittest.mock import MagicMock
 
 import pytest

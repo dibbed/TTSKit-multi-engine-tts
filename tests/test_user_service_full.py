@@ -8,7 +8,7 @@ We use simulated AsyncSession to ensure thorough coverage.
 from __future__ import annotations
 
 import json
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import pytest
@@ -199,7 +199,7 @@ async def test_verify_api_key_paths_and_permissions_with_async_session(
         api_key_hash=APIKey.hash_api_key(expired_plain),
         permissions='["read"]',
         is_active=True,
-        expires_at=datetime.now(timezone.utc) - timedelta(days=1),
+        expires_at=datetime.now(UTC) - timedelta(days=1),
     )
     test_db.add(expired)
     test_db.commit()

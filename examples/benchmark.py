@@ -12,13 +12,13 @@ from ttskit.utils.audio import get_audio_info, to_opus_ogg
 
 async def benchmark_engine(engine, text: str, lang: str, iterations: int = 3) -> dict:
     """Tests how fast a TTS engine is by running it several times.
-    
+
     Args:
         engine: TTS engine to test
         text: Text to synthesize for the test
         lang: Language code to use
         iterations: How many times to run the test
-        
+
     Returns:
         Dictionary with timing stats, file sizes, and other useful metrics
     """
@@ -63,7 +63,7 @@ async def benchmark_engine(engine, text: str, lang: str, iterations: int = 3) ->
 
 async def run_benchmarks():
     """Runs speed tests on different TTS engines with various text types.
-    
+
     Tests short text, long text, and different languages to see how each
     engine performs. Great for figuring out which engine works best for
     your specific use case.
@@ -112,7 +112,7 @@ async def run_benchmarks():
 
 async def test_router_performance():
     """Tests how fast the engine router picks the right engine for each language.
-    
+
     Measures how long it takes to choose an engine for different languages.
     Should be pretty fast since it's just looking up which engine to use.
     """
@@ -133,7 +133,7 @@ async def test_router_performance():
 
 async def test_cache_performance():
     """Tests how much faster things get when using the cache.
-    
+
     Generates audio once, then gets it from cache the second time to show
     the speed difference. Cache should be way faster than generating fresh.
     """

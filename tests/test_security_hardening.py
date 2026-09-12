@@ -9,15 +9,12 @@ Validates:
 6. Rate limiting enabled vs disabled behavior.
 """
 
-import asyncio
 import logging
 from unittest.mock import MagicMock
 
 import pytest
 from fastapi import HTTPException
-from fastapi.testclient import TestClient
 
-from ttskit.api.app import create_app
 from ttskit.api.dependencies import (
     APIKeyAuth,
     check_rate_limit,
@@ -135,9 +132,10 @@ async def test_rate_limiting_toggle(monkeypatch):
 
 def test_cors_wildcard_disallows_credentials(monkeypatch):
     """Wildcard CORS origins must not be paired with allow_credentials=True."""
-    from ttskit.api.middleware import setup_cors_middleware
     from fastapi import FastAPI
     from fastapi.middleware.cors import CORSMiddleware
+
+    from ttskit.api.middleware import setup_cors_middleware
 
     test_app = FastAPI()
     monkeypatch.setattr("ttskit.api.middleware.settings.cors_origins", ["*"])

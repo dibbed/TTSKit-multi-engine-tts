@@ -3,8 +3,6 @@
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 from ttskit.cache.redis import RedisCache
 from ttskit.utils.audio_manager import AudioManager
 

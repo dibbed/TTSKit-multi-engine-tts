@@ -9,7 +9,7 @@ from gtts import gTTS
 
 class StandaloneGTTSEngine:
     """Minimal standalone Google TTS engine with no external package dependencies.
-    
+
     Provides basic text-to-speech synthesis using Google TTS with language mapping
     and temporary file management for independent usage scenarios.
     """
@@ -25,7 +25,7 @@ class StandaloneGTTSEngine:
 
     def __init__(self, default_lang: str | None = None) -> None:
         """Initializes the standalone engine with default language setting.
-        
+
         Args:
             default_lang: Default language code for synthesis (defaults to "en")
         """
@@ -33,11 +33,11 @@ class StandaloneGTTSEngine:
 
     def synth_to_mp3(self, text: str, lang: str | None = None) -> str:
         """Synthesizes text to MP3 file using Google TTS with language mapping.
-        
+
         Args:
             text: Text to synthesize
             lang: Language code (uses default if not specified)
-            
+
         Returns:
             Path to generated MP3 file in temporary directory
         """
@@ -52,7 +52,7 @@ class StandaloneGTTSEngine:
 
 def main():
     """Demonstrates pure standalone Google TTS usage without TTSKit dependencies.
-    
+
     Shows engine instantiation, multi-language synthesis, file verification,
     cleanup operations, and language mapping display for minimal TTS integration.
     """

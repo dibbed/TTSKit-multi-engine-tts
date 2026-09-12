@@ -8,7 +8,7 @@ from ttskit.engines.edge_engine import EdgeEngine
 
 def simple_edge_example():
     """Demonstrates EdgeEngine usage as a standalone component without full TTSKit.
-    
+
     Shows direct engine instantiation, multi-language synthesis, file creation
     verification, and cleanup operations for independent Edge TTS usage.
     """
@@ -51,7 +51,7 @@ def simple_edge_example():
 
 def voice_mapping_example():
     """Displays the language-to-voice mapping used by EdgeEngine.
-    
+
     Shows how different language codes are mapped to specific Edge TTS voices
     for consistent voice selection across different languages.
     """

@@ -5,7 +5,6 @@ Uses async operations with print statements for progress logging; sync wrapper a
 """
 
 import asyncio
-from typing import Any, Optional
 
 from ..services.user_service import UserService
 from ..utils.logging_config import get_logger
@@ -14,7 +13,7 @@ from .connection import create_tables_async, get_async_session_context
 logger = get_logger(__name__)
 
 
-async def init_database_async() -> dict[str, Optional[str]]:
+async def init_database_async() -> dict[str, str | None]:
     """Asynchronously initialize the database by creating tables and seeding default data.
 
     Creates an admin user with full permissions API key and a demo user with basic permissions.
@@ -28,7 +27,7 @@ async def init_database_async() -> dict[str, Optional[str]]:
     await create_tables_async()
     logger.info("Database tables created successfully")
 
-    created_keys: dict[str, Optional[str]] = {
+    created_keys: dict[str, str | None] = {
         "admin_api_key": None,
         "demo_api_key": None,
     }
@@ -55,7 +54,9 @@ async def init_database_async() -> dict[str, Optional[str]]:
                 user_id="admin",
                 permissions=["read", "write", "admin"],
             )
-            created_keys["admin_api_key"] = admin_api_key_data.get("api_key")
+            created_keys["admin_api_key"] = (
+                admin_api_key_data.get("api_key") if admin_api_key_data else None
+            )
             logger.info("Admin API key created successfully (user_id=admin)")
 
         demo_user = await user_service.get_user_by_id("demo-user")
@@ -76,7 +77,9 @@ async def init_database_async() -> dict[str, Optional[str]]:
                 user_id="demo-user",
                 permissions=["read", "write"],
             )
-            created_keys["demo_api_key"] = demo_api_key_data.get("api_key")
+            created_keys["demo_api_key"] = (
+                demo_api_key_data.get("api_key") if demo_api_key_data else None
+            )
             logger.info("Demo API key created successfully (user_id=demo-user)")
 
         logger.info("Database initialization completed successfully")
@@ -89,7 +92,7 @@ async def init_database_async() -> dict[str, Optional[str]]:
         await db_session.close()
 
 
-def init_database() -> dict[str, Optional[str]]:
+def init_database() -> dict[str, str | None]:
     """Synchronously initialize the database by running the async initialization.
 
     Convenience wrapper for non-async environments; calls asyncio.run on the async function.

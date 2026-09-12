@@ -20,7 +20,7 @@ from ..utils.performance import get_performance_monitor
 class EngineCapabilities:
     """
     Engine capabilities and limitations.
-    
+
     This class defines what features and limitations a TTS engine has,
     including supported languages, voices, and control options.
     """
@@ -45,7 +45,7 @@ class EngineCapabilities:
 class TTSEngine(ABC):
     """
     Abstract base class for TTS engines.
-    
+
     This class defines the interface that all TTS engines must implement,
     providing both synchronous and asynchronous synthesis methods along
     with capability reporting and validation.
@@ -78,9 +78,9 @@ class TTSEngine(ABC):
         self,
         text: str,
         lang: str,
-        voice: str,
-        rate: str,
-        pitch: str,
+        voice: str = "",
+        rate: str = "1.0",
+        pitch: str = "0.0",
     ) -> bytes:
         """
         Synchronous shortcut that delegates to synth_async.
@@ -88,14 +88,14 @@ class TTSEngine(ABC):
         This default implementation converts string-based parameters to
         numeric values and calls the async implementation. Engines don't
         need to override this unless they want custom behavior.
-        
+
         Args:
             text: Text to synthesize
             lang: Language code
             voice: Voice name
             rate: Rate as string (e.g., "100%", "1.5")
             pitch: Pitch as string (e.g., "0st", "5")
-            
+
         Returns:
             Audio data as bytes
         """
@@ -403,7 +403,7 @@ class TTSEngine(ABC):
 class BaseEngine(TTSEngine):
     """
     Base engine implementation with common functionality.
-    
+
     This class provides a concrete implementation of common TTS engine
     functionality that can be extended by specific engine implementations.
     """
@@ -417,7 +417,7 @@ class BaseEngine(TTSEngine):
     def _get_default_capabilities(self) -> EngineCapabilities:
         """
         Get default capabilities for this engine.
-        
+
         Returns:
             Default EngineCapabilities with basic settings
         """
@@ -434,7 +434,7 @@ class BaseEngine(TTSEngine):
     def get_capabilities(self) -> EngineCapabilities:
         """
         Get engine capabilities.
-        
+
         Returns:
             EngineCapabilities object describing this engine's features
         """
@@ -443,7 +443,7 @@ class BaseEngine(TTSEngine):
     def is_available(self) -> bool:
         """
         Check if engine is available.
-        
+
         Returns:
             True if engine is ready for use
         """
@@ -517,7 +517,7 @@ class BaseEngine(TTSEngine):
     async def _get_connection_pool(self):
         """
         Get connection pool for HTTP requests.
-        
+
         Returns:
             Connection pool instance for making HTTP requests
         """

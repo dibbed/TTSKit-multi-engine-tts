@@ -119,7 +119,7 @@ class BaseCache(CacheInterface):
         """Record a cache error."""
         self._increment_stat("errors")
 
-    def get_stats(self) -> dict[str, int]:
+    def get_stats(self) -> dict[str, Any]:
         """Get cache statistics.
 
         Returns:

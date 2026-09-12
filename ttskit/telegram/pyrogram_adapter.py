@@ -6,7 +6,6 @@ async-friendly manner. Designed for use with TTSKit's unified interface.
 """
 
 from pathlib import Path
-from typing import Optional
 
 from pyrogram import Client
 from pyrogram.types import Chat, Message, User
@@ -40,7 +39,7 @@ class PyrogramAdapter(TelegramAdapter):
         bot_token: str,
         api_id: int | None = None,
         api_hash: str | None = None,
-        client: Optional[Client] = None,
+        client: Client | None = None,
     ):
         """Initialize the adapter with Pyrogram credentials and optional client.
 

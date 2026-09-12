@@ -13,7 +13,7 @@ from ttskit.database.connection import get_session
 
 async def test_api_key_priority():
     """Tests API key priority system with various key types and permission levels.
-    
+
     Validates that config-based keys take priority over database keys, admin keys
     receive appropriate permissions, and user identification works correctly across
     different authentication scenarios.
@@ -107,7 +107,7 @@ async def test_api_key_priority():
 
 async def test_invalid_keys():
     """Tests rejection of invalid API keys and proper error handling.
-    
+
     Verifies that non-existent, malformed, and empty API keys are properly
     rejected by the authentication system with appropriate error responses.
     """
@@ -138,7 +138,7 @@ async def test_invalid_keys():
 
 async def demonstrate_priority():
     """Demonstrates the API key priority system and configuration hierarchy.
-    
+
     Explains how different key sources are prioritized and shows current
     configuration settings for API keys and authentication.
     """
@@ -164,7 +164,7 @@ async def demonstrate_priority():
 
 async def main():
     """Runs comprehensive API key priority system tests and demonstrations.
-    
+
     Executes priority demonstration, key validation tests, and invalid key
     rejection tests. Displays summary of authentication system behavior.
     """

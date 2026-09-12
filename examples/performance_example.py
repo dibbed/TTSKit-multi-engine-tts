@@ -1,6 +1,6 @@
 """TTSKit Performance Optimization Example
 
-Shows how to use performance features like connection pooling, parallel processing, 
+Shows how to use performance features like connection pooling, parallel processing,
 and memory optimization to get the most out of your TTS setup.
 """
 
@@ -20,7 +20,7 @@ from ttskit.utils.performance import (
 
 async def performance_example():
     """Shows off TTSKit's performance features with real examples.
-    
+
     Walks through connection pooling, parallel processing, memory monitoring,
     TTS performance tracking, and engine comparisons to help you optimize
     your text-to-speech workflow.
@@ -72,10 +72,10 @@ async def performance_example():
 
     async def process_item(item: str) -> str:
         """Processes an item with a small delay to simulate real work.
-        
+
         Args:
             item: Item identifier to process
-            
+
         Returns:
             Processed item string with prefix
         """
@@ -150,7 +150,7 @@ async def performance_example():
 
 async def batch_processing_example():
     """Shows how to handle lots of TTS requests at once efficiently.
-    
+
     Processes multiple texts in parallel, handles errors gracefully, and gives
     you useful stats about timing and success rates so you can see how well
     things are working.
@@ -166,10 +166,10 @@ async def batch_processing_example():
 
     async def synthesize_text(text: str) -> dict:
         """Synthesizes one text and gives you back the results.
-        
+
         Args:
             text: Text to turn into speech
-            
+
         Returns:
             Dictionary with results including success status, file size, and any errors
         """
@@ -206,7 +206,7 @@ if __name__ == "__main__":
 
     async def main():
         """Runs all the performance examples to show what TTSKit can do.
-        
+
         Goes through performance monitoring, optimization features, and batch
         processing to give you a good feel for how fast things can be.
         """

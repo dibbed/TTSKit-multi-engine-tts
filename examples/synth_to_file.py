@@ -12,7 +12,7 @@ from ttskit.utils.audio import to_opus_ogg
 
 def main() -> None:
     """Command-line interface for Google TTS synthesis with OGG/Opus output.
-    
+
     Parses command-line arguments for text, language, and output file,
     synthesizes audio using Google TTS engine, converts to OGG format,
     and saves the result to the specified file.

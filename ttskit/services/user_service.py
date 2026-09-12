@@ -5,8 +5,7 @@ It supports both synchronous and asynchronous SQLAlchemy sessions for flexible d
 """
 
 import json
-from datetime import datetime, timezone
-from typing import List, Optional
+from datetime import UTC, datetime
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -32,8 +31,8 @@ class UserService:
     async def create_user(
         self,
         user_id: str,
-        username: Optional[str] = None,
-        email: Optional[str] = None,
+        username: str | None = None,
+        email: str | None = None,
         is_admin: bool = False,
     ) -> User:
         """Creates a new user account.
@@ -83,7 +82,7 @@ class UserService:
             logger.error(f"Failed to create user {user_id}: {e}")
             raise
 
-    async def get_user_by_id(self, user_id: str) -> Optional[User]:
+    async def get_user_by_id(self, user_id: str) -> User | None:
         """Retrieves a user by their unique ID.
 
         Args:
@@ -108,7 +107,7 @@ class UserService:
             logger.error(f"Failed to get user {user_id}: {e}")
             return None
 
-    async def get_all_users(self) -> List[User]:
+    async def get_all_users(self) -> list[User]:
         """Retrieves all users from the database.
 
         Returns:
@@ -131,11 +130,11 @@ class UserService:
     async def update_user(
         self,
         user_id: str,
-        username: Optional[str] = None,
-        email: Optional[str] = None,
-        is_admin: Optional[bool] = None,
-        is_active: Optional[bool] = None,
-    ) -> Optional[User]:
+        username: str | None = None,
+        email: str | None = None,
+        is_admin: bool | None = None,
+        is_active: bool | None = None,
+    ) -> User | None:
         """Updates user information with provided fields.
 
         Args:
@@ -171,7 +170,7 @@ class UserService:
             if is_active is not None:
                 user.is_active = is_active
 
-            user.updated_at = datetime.now(timezone.utc)
+            user.updated_at = datetime.now(UTC)
 
             if isinstance(self.db, AsyncSession):
                 await self.db.commit()
@@ -226,9 +225,9 @@ class UserService:
     async def create_api_key(
         self,
         user_id: str,
-        permissions: List[str],
-        expires_at: Optional[datetime] = None,
-    ) -> Optional[dict]:
+        permissions: list[str],
+        expires_at: datetime | None = None,
+    ) -> dict | None:
         """Creates a new API key for a specified user.
 
         Args:
@@ -288,7 +287,7 @@ class UserService:
             logger.error(f"Failed to create API key for {user_id}: {e}")
             raise
 
-    async def get_api_key_by_hash(self, api_key_hash: str) -> Optional[APIKey]:
+    async def get_api_key_by_hash(self, api_key_hash: str) -> APIKey | None:
         """Retrieves an API key by its hashed value.
 
         Args:
@@ -317,7 +316,7 @@ class UserService:
             logger.error(f"Failed to get API key by hash: {e}")
             return None
 
-    async def get_user_api_keys(self, user_id: str) -> List[APIKey]:
+    async def get_user_api_keys(self, user_id: str) -> list[APIKey]:
         """Retrieves all API keys associated with a user.
 
         Args:
@@ -347,10 +346,10 @@ class UserService:
         self,
         user_id: str,
         api_key_id: int,
-        permissions: Optional[List[str]] = None,
-        is_active: Optional[bool] = None,
-        expires_at: Optional[datetime] = None,
-    ) -> Optional[APIKey]:
+        permissions: list[str] | None = None,
+        is_active: bool | None = None,
+        expires_at: datetime | None = None,
+    ) -> APIKey | None:
         """Updates an existing API key for a user.
 
         Args:
@@ -398,7 +397,7 @@ class UserService:
             if expires_at is not None:
                 api_key.expires_at = expires_at
 
-            api_key.updated_at = datetime.now(timezone.utc)
+            api_key.updated_at = datetime.now(UTC)
 
             if isinstance(self.db, AsyncSession):
                 await self.db.commit()
@@ -464,7 +463,7 @@ class UserService:
             logger.error(f"Failed to delete API key for {user_id}: {e}")
             raise
 
-    async def verify_api_key(self, api_key_plain: str) -> Optional[dict]:
+    async def verify_api_key(self, api_key_plain: str) -> dict | None:
         """Verifies an API key and returns associated user information.
 
         Args:
@@ -495,7 +494,7 @@ class UserService:
                 logger.warning(f"Invalid API key (expired/inactive): {api_key.id}")
                 return None
 
-            api_key.last_used = datetime.now(timezone.utc)
+            api_key.last_used = datetime.now(UTC)
             api_key.usage_count += 1
 
             if isinstance(self.db, AsyncSession):

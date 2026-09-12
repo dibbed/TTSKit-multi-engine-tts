@@ -6,7 +6,7 @@ Uses regex patterns and sets for efficient checks.
 """
 
 import re
-from typing import Any, Dict
+from typing import Any
 
 # Comprehensive mapping of supported language codes to names
 SUPPORTED_LANGUAGES = {
@@ -86,7 +86,7 @@ SUPPORTED_LANGUAGES = {
 }
 
 # Dict of regex patterns and examples for validating voice names per TTS engine
-VOICE_PATTERNS: Dict[str, Dict[str, Any]] = {
+VOICE_PATTERNS: dict[str, dict[str, Any]] = {
     "edge": {
         "pattern": r"^[a-z]{2}-[A-Z]{2}-[A-Za-z]+Neural$",
         "examples": ["en-US-AriaNeural", "fa-IR-DilaraNeural", "ar-SA-HamedNeural"],

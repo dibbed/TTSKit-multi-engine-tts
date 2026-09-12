@@ -100,13 +100,13 @@ def test_get_engine_postgres_branch(monkeypatch):
 
     def fake_create_engine(url, echo, pool_pre_ping, pool_size, max_overflow):
         captured.update(
-            dict(
-                url=url,
-                echo=echo,
-                pool_pre_ping=pool_pre_ping,
-                pool_size=pool_size,
-                max_overflow=max_overflow,
-            )
+            {
+                "url": url,
+                "echo": echo,
+                "pool_pre_ping": pool_pre_ping,
+                "pool_size": pool_size,
+                "max_overflow": max_overflow,
+            }
         )
         return object()
 
@@ -139,13 +139,13 @@ async def test_get_async_engine_postgres_branch(monkeypatch):
 
     def fake_create_async_engine(url, echo, pool_pre_ping, pool_size, max_overflow):
         captured.update(
-            dict(
-                url=url,
-                echo=echo,
-                pool_pre_ping=pool_pre_ping,
-                pool_size=pool_size,
-                max_overflow=max_overflow,
-            )
+            {
+                "url": url,
+                "echo": echo,
+                "pool_pre_ping": pool_pre_ping,
+                "pool_size": pool_size,
+                "max_overflow": max_overflow,
+            }
         )
         return object()
 

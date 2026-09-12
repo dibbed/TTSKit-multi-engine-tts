@@ -1,6 +1,6 @@
 """Tests for admin router endpoints in ttskit.api.routers.admin, covering user and API key management (list/create/get/delete) with authentication, success, and error scenarios using TestClient and monkeypatching, aligned with test_api_app.py style."""
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 import pytest
@@ -45,7 +45,7 @@ class _UserStub:
         self.email = email
         self.is_admin = is_admin
         self.is_active = is_active
-        self.created_at = created_at or datetime.now(timezone.utc)
+        self.created_at = created_at or datetime.now(UTC)
         self.last_login = last_login
 
 
@@ -81,7 +81,7 @@ class _APIKeyStub:
         self.user_id = user_id
         self.permissions = permissions_json
         self.is_active = is_active
-        self.created_at = created_at or datetime.now(timezone.utc)
+        self.created_at = created_at or datetime.now(UTC)
         self.last_used = last_used
         self.expires_at = expires_at
         self.usage_count = usage_count
@@ -460,7 +460,7 @@ class TestAdminApiKeys:
 
     def test_create_api_key_success(self, _test_client, patch_admin_auth, monkeypatch):
         """Tests successful API key creation for a user (creating user if needed), returning key details including plain key."""
-        from datetime import datetime, timezone
+        from datetime import datetime
 
         async def get_user_by_id(user_id: str):
             return None
@@ -476,7 +476,7 @@ class TestAdminApiKeys:
                 "api_key": "plain-key",
                 "permissions": permissions,
                 "expires_at": None,
-                "created_at": datetime.now(timezone.utc),
+                "created_at": datetime.now(UTC),
             }
 
         _patch_userservice(

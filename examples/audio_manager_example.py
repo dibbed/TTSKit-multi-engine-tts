@@ -16,7 +16,7 @@ logger = get_logger(__name__)
 
 async def basic_usage_example():
     """Shows the basics of using AudioManager for everyday TTS tasks.
-    
+
     Simple audio generation and file saving - the stuff you'll probably
     use most often when working with text-to-speech.
     """
@@ -35,7 +35,7 @@ async def basic_usage_example():
 
 async def custom_manager_example():
     """Shows how to set up AudioManager with your own cache settings.
-    
+
     Creates a custom manager with specific cache limits and generates audio
     in multiple languages. Useful when you want more control over how
     caching works.
@@ -70,7 +70,7 @@ async def custom_manager_example():
 
 async def cache_management_example():
     """Shows all the cache management tools you get with AudioManager.
-    
+
     Generates some test files, shows cache stats, lists what's cached,
     and demonstrates export and cleanup features. Pretty handy for
     keeping your cache organized.
@@ -106,7 +106,7 @@ async def cache_management_example():
 
 async def error_handling_example():
     """Shows how AudioManager handles things when stuff goes wrong.
-    
+
     Tests what happens with invalid engines, super long text, and other
     edge cases. Good to know how it fails so you can handle errors gracefully.
     """
@@ -132,7 +132,7 @@ async def error_handling_example():
 
 async def performance_example():
     """Shows how much faster caching makes things.
-    
+
     Generates the same audio twice - once fresh, once from cache - to
     demonstrate the speed boost you get from caching. Should be pretty
     dramatic!
@@ -168,7 +168,7 @@ async def performance_example():
 
 async def main():
     """Runs all the AudioManager examples to show what it can do.
-    
+
     Goes through basic usage, custom setup, cache management, error handling,
     and performance testing. Should give you a good feel for how AudioManager
     works.

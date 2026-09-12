@@ -10,7 +10,7 @@ import httpx
 
 class TTSKitAPIClient:
     """HTTP client for interacting with TTSKit API endpoints.
-    
+
     Provides methods for synthesis, batch processing, voice listing, engine information,
     health checks, and cache statistics. Handles authentication and request formatting.
     """
@@ -19,7 +19,7 @@ class TTSKitAPIClient:
         self, base_url: str = "http://localhost:8000", api_key: str = "demo-key"
     ):
         """Initializes API client with base URL and authentication.
-        
+
         Args:
             base_url: TTSKit API server base URL
             api_key: Authentication key for API access
@@ -42,7 +42,7 @@ class TTSKitAPIClient:
         pitch: float = 0.0,
     ) -> bytes:
         """Synthesizes text to speech via API and returns audio data.
-        
+
         Args:
             text: Text to synthesize
             lang: Language code (default: "en")
@@ -51,7 +51,7 @@ class TTSKitAPIClient:
             format: Audio format ("ogg", "mp3", "wav")
             rate: Speech rate multiplier
             pitch: Pitch adjustment in semitones
-            
+
         Returns:
             Raw audio data as bytes
         """
@@ -81,14 +81,14 @@ class TTSKitAPIClient:
         format: str = "ogg",
     ) -> dict:
         """Synthesizes multiple texts in a single batch request.
-        
+
         Args:
             texts: List of text strings to synthesize
             lang: Language code for all texts
             engine: TTS engine to use (optional)
             voice: Specific voice name (optional)
             format: Audio format for all outputs
-            
+
         Returns:
             Dictionary with batch results including success counts and audio data
         """
@@ -111,13 +111,13 @@ class TTSKitAPIClient:
         self, text: str, lang: str = "en", engine: str = None, voice: str = None
     ) -> dict:
         """Previews synthesis parameters without generating audio.
-        
+
         Args:
             text: Text to preview
             lang: Language code
             engine: TTS engine to use (optional)
             voice: Specific voice name (optional)
-            
+
         Returns:
             Dictionary with preview information including estimated duration and text analysis
         """
@@ -137,7 +137,7 @@ class TTSKitAPIClient:
 
     async def list_engines(self) -> list[dict]:
         """Retrieves list of available TTS engines with their capabilities.
-        
+
         Returns:
             List of dictionaries containing engine information including names,
             availability status, and supported languages
@@ -152,11 +152,11 @@ class TTSKitAPIClient:
 
     async def list_voices(self, engine: str = None, language: str = None) -> list[dict]:
         """Retrieves available voices with optional filtering.
-        
+
         Args:
             engine: Filter by specific engine name (optional)
             language: Filter by language code (optional)
-            
+
         Returns:
             List of dictionaries containing voice information including names,
             languages, and associated engines
@@ -178,7 +178,7 @@ class TTSKitAPIClient:
 
     async def get_health(self) -> dict:
         """Retrieves API service health status and engine availability.
-        
+
         Returns:
             Dictionary with health status, uptime, and engine availability information
         """
@@ -189,7 +189,7 @@ class TTSKitAPIClient:
 
     async def get_cache_stats(self) -> dict:
         """Retrieves cache performance statistics and metrics.
-        
+
         Returns:
             Dictionary with cache hit rates, entry counts, and performance metrics
         """
@@ -204,7 +204,7 @@ class TTSKitAPIClient:
 
 async def main():
     """Demonstrates comprehensive TTSKit API usage with various endpoints.
-    
+
     Shows health checking, engine and voice listing, synthesis preview,
     single and batch synthesis, file saving, and cache statistics retrieval.
     """

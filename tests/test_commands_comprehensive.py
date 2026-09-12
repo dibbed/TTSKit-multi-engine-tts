@@ -271,7 +271,7 @@ class TestCommandRegistryRegisterAdmin:
         registry.register_admin(mock_bot)
 
         with (
-            patch("ttskit.utils.audio_manager.audio_manager") as mock_audio_manager,
+            patch("ttskit.utils.audio_manager.audio_manager"),
             patch("ttskit.utils.temp_manager.TempFileManager") as mock_temp_manager,
         ):
             mock_temp_instance = Mock()

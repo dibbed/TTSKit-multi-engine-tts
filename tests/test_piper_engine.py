@@ -675,7 +675,6 @@ class TestPiperEngine:
         assert isinstance(result, bool)
 
         # Test with PIPER_AVAILABLE = False (simulated)
-        original_piper_available = PIPER_AVAILABLE
         try:
             # This is a bit tricky since PIPER_AVAILABLE is a module-level constant
             # We'll test the logic by setting _available to False

@@ -1,7 +1,6 @@
 """Comprehensive tests for AdvancedMetricsCollector module."""
 
 import asyncio
-import json
 import tempfile
 from collections import deque
 from datetime import datetime
@@ -551,7 +550,7 @@ class TestAdvancedMetricsCollector:
     @pytest.mark.asyncio
     async def test_history_size_limit(self, collector):
         """Test history size limiting."""
-        for i in range(150):
+        for _i in range(150):
             await collector.record_request("gtts", "en", 1.0, True)
 
         assert len(collector.request_history) == 100

@@ -5,7 +5,7 @@ This router handles all administrative operations related to user management and
 """
 
 from datetime import datetime
-from typing import Annotated, List
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
@@ -64,7 +64,7 @@ class APIKeyInfo(BaseModel):
     id: int = Field(description="API Key ID")
     user_id: str = Field(description="User ID")
     api_key_plain: str = Field(description="API Key (plain text)")
-    permissions: List[str] = Field(description="User permissions")
+    permissions: list[str] = Field(description="User permissions")
     is_active: bool = Field(description="Is API key active")
     created_at: str = Field(description="Creation timestamp")
     last_used: str | None = Field(description="Last used timestamp", default=None)
@@ -95,7 +95,7 @@ class CreateAPIKeyRequest(BaseModel):
     """
 
     user_id: str = Field(description="User ID", min_length=1, max_length=50)
-    permissions: List[str] = Field(
+    permissions: list[str] = Field(
         default=["read", "write"], description="User permissions"
     )
     expires_at: str | None = Field(
@@ -111,7 +111,7 @@ class UpdateAPIKeyRequest(BaseModel):
 
     """
 
-    permissions: List[str] = Field(description="Updated permissions")
+    permissions: list[str] = Field(description="Updated permissions")
     is_active: bool | None = Field(description="Is API key active", default=None)
     expires_at: str | None = Field(
         description="Expiration date (ISO format)", default=None
@@ -129,12 +129,12 @@ class CreateAPIKeyResponse(BaseModel):
     id: int = Field(description="API Key ID")
     user_id: str = Field(description="User ID")
     api_key: str = Field(description="API Key (shown only once)")
-    permissions: List[str] = Field(description="User permissions")
+    permissions: list[str] = Field(description="User permissions")
     created_at: str = Field(description="Creation timestamp")
     expires_at: str | None = Field(description="Expiration timestamp", default=None)
 
 
-@router.get("/users", response_model=List[UserInfo])
+@router.get("/users", response_model=list[UserInfo])
 async def list_users(
     auth: Annotated[WriteAuth, WriteAuth],
     db: Annotated[Session, Depends(get_session)],
@@ -401,7 +401,7 @@ async def delete_user(
         raise HTTPException(status_code=500, detail=str(e)) from e
 
 
-@router.get("/api-keys", response_model=List[APIKeyInfo])
+@router.get("/api-keys", response_model=list[APIKeyInfo])
 async def list_api_keys(
     auth: Annotated[WriteAuth, WriteAuth],
     db: Annotated[Session, Depends(get_session)],

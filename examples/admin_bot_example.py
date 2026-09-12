@@ -14,7 +14,7 @@ from ttskit.config import settings
 
 async def main():
     """Starts a TTSKit Telegram bot with administrative features enabled.
-    
+
     Configures bot token, sets up admin users, displays available admin commands,
     and runs the bot with full admin panel functionality including API key management,
     system monitoring, and performance analysis tools.

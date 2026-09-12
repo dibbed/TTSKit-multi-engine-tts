@@ -8,7 +8,7 @@ import asyncio
 import os
 import sys
 from collections.abc import Callable, Coroutine
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from ..utils.logging_config import get_logger
@@ -16,7 +16,7 @@ from ..utils.logging_config import get_logger
 logger = get_logger(__name__)
 
 
-class LifecycleMode(str, Enum):
+class LifecycleMode(StrEnum):
     SUPERVISED = "supervised"
     STANDALONE = "standalone"
 
@@ -153,7 +153,7 @@ class ProcessLifecycleManager:
     async def _delayed_execv(self, delay: float) -> None:
         try:
             await asyncio.sleep(delay)
-            os.execv(sys.executable, [sys.executable] + sys.argv)
+            os.execv(sys.executable, [sys.executable] + sys.argv)  # noqa: S606
         except Exception as e:
             logger.error(f"Failed to execv restart: {e}")
             os._exit(1)

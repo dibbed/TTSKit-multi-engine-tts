@@ -13,7 +13,7 @@ from ttskit import TTS, SynthConfig
 
 async def main():
     """Demonstrates Piper TTS engine usage with model validation and synthesis.
-    
+
     Checks for required voice models, creates TTS instance, lists available engines,
     performs test synthesis, and saves the resulting audio file with detailed
     audio information display.
@@ -88,7 +88,7 @@ async def main():
 
 async def test_different_voices():
     """Tests multiple Piper voices with synthesis and performance measurement.
-    
+
     Lists available Piper voices, tests the first three voices with sample text,
     and displays synthesis results including duration and success status.
     """

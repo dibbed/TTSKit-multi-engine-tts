@@ -23,7 +23,7 @@ logger = get_logger(__name__)
 class EngineFactory:
     """
     Factory for creating and managing TTS engines.
-    
+
     This class handles registration, creation, and management of TTS engines,
     providing a centralized way to work with different engine implementations
     and their capabilities.
@@ -32,7 +32,7 @@ class EngineFactory:
     def __init__(self):
         """
         Initialize the engine factory.
-        
+
         Sets up internal storage for engine classes, configurations, and
         instances, then registers all default engines.
         """
@@ -44,7 +44,7 @@ class EngineFactory:
     def _register_default_engines(self) -> None:
         """
         Register default engines.
-        
+
         Registers GTTS, Edge TTS, and Piper engines with their default
         configurations and capabilities if they are available.
         """
@@ -567,7 +567,7 @@ _builtins.EDGE_AVAILABLE = EDGE_AVAILABLE
 def setup_registry(registry: EngineRegistry, **kwargs) -> None:
     """
     Setup registry using the global factory.
-    
+
     Args:
         registry: Engine registry to configure
         **kwargs: Arguments to pass to engines

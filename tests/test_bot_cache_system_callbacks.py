@@ -66,7 +66,7 @@ async def test_confirm_clear_cache_callback_error_path():
 
     with patch(
         "ttskit.bot.callbacks.t", side_effect=["cache_cleared", "err_text"]
-    ) as pt:
+    ):
         bot.adapter.send_message = AsyncMock(side_effect=[Exception("e"), None])
 
         await cb.confirm_clear_cache_callback(bot, msg, "confirm_clear_cache")
@@ -92,7 +92,7 @@ async def test_confirm_restart_callback_success():
     msg = make_mock_message()
     with patch(
         "ttskit.bot.callbacks.t", side_effect=["restarting", "restart_complete"]
-    ) as pt:
+    ):
         await cb.confirm_restart_callback(bot, msg, "confirm_restart")
         assert bot.adapter.send_message.await_count == 2
 
@@ -101,7 +101,7 @@ async def test_confirm_restart_callback_success():
 async def test_confirm_restart_callback_error():
     bot = make_mock_bot()
     msg = make_mock_message()
-    with patch("ttskit.bot.callbacks.t", return_value="error_restart_text") as pt:
+    with patch("ttskit.bot.callbacks.t", return_value="error_restart_text"):
         bot.adapter.send_message = AsyncMock(side_effect=[Exception("boom"), None])
         await cb.confirm_restart_callback(bot, msg, "confirm_restart")
         assert bot.adapter.send_message.await_count == 2

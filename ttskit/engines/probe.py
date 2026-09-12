@@ -97,7 +97,7 @@ async def probe_engine(
         else:
             loop = asyncio.get_running_loop()
             audio_bytes = await asyncio.wait_for(
-                loop.run_in_executor(None, engine.synth, test_text, test_lang),
+                loop.run_in_executor(None, lambda: engine.synth(test_text, test_lang, "", "1.0", "0.0")),
                 timeout=timeout_seconds,
             )
 

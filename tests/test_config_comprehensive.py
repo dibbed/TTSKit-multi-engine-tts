@@ -463,7 +463,7 @@ class TestSaveConfigToFile:
         try:
             save_config_to_file(temp_file, settings)
 
-            with open(temp_file, "r", encoding="utf-8") as f:
+            with open(temp_file, encoding="utf-8") as f:
                 content = f.read()
 
             assert "# TTSKit Configuration File" in content

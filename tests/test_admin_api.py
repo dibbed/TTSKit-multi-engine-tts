@@ -509,7 +509,7 @@ class TestAdminAPIEndpoints:
 
         assert data["user_id"] == "admin"
         assert data["username"] == "admin"
-        assert data["is_admin"] == True
+        assert data["is_admin"]
         if "permissions" in data:
             assert data["permissions"] == ["read", "write", "admin"]
         if "api_key" in data:
@@ -539,7 +539,7 @@ class TestAdminAPIEndpoints:
 
         assert data["user_id"] == "test_user"
         assert data["username"] == "test_user"
-        assert data["is_admin"] == False
+        assert not data["is_admin"]
         if "permissions" in data:
             assert data["permissions"] == ["read", "write"]
         if "api_key" in data:

@@ -17,7 +17,6 @@ class TestAdaptersFactory:
     def test_factory_imports_forwarded(self):
         """Test that factory imports are properly forwarded."""
         from ttskit.adapters.factory import AdapterFactory, AdapterType
-
         from ttskit.telegram.factory import AdapterFactory as telegram_AdapterFactory
         from ttskit.telegram.factory import AdapterType as telegram_AdapterType
 
@@ -47,7 +46,7 @@ class TestAdaptersFactory:
         import ttskit.adapters.factory as factory_module
         import ttskit.telegram.factory as telegram_factory
 
-        telegram_attrs = [
+        [
             attr for attr in dir(telegram_factory) if not attr.startswith("_")
         ]
 

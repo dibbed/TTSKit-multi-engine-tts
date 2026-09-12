@@ -5,7 +5,6 @@ Ensures metrics and performance are recorded properly for both good and bad synt
 
 from __future__ import annotations
 
-import asyncio
 import pytest
 
 

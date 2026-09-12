@@ -1,6 +1,5 @@
 """Comprehensive tests for health module."""
 
-import asyncio
 import subprocess
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -127,7 +126,7 @@ class TestHealthChecker:
         """Test FFmpeg check timeout."""
         checker = HealthChecker()
 
-        with patch("subprocess.run", side_effect=asyncio.TimeoutError()):
+        with patch("subprocess.run", side_effect=TimeoutError()):
             result = await checker.check_ffmpeg()
 
             assert result is False

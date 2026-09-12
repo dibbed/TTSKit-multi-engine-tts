@@ -1980,7 +1980,7 @@ async def admin_restart_system(bot, message: TelegramMessage, _: str) -> None:
 
         res = await lifecycle_manager.request_restart(grace_period_seconds=0.0)
         if not res.get("supported") or hasattr(os, "execv"):
-            os.execv(sys.executable, [sys.executable] + sys.argv)
+            os.execv(sys.executable, [sys.executable] + sys.argv)  # noqa: S606
     except Exception as e:
         chat_id = getattr(message, "chat_id", None) or (
             message.get("chat_id") if hasattr(message, "get") else None

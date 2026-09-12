@@ -6,8 +6,7 @@ Supports SQLite and PostgreSQL via declarative base.
 
 import hashlib
 import secrets
-from datetime import datetime, timezone
-from typing import Optional
+from datetime import UTC, datetime
 
 from sqlalchemy import Boolean, DateTime, ForeignKey, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -36,15 +35,15 @@ class User(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     user_id: Mapped[str] = mapped_column(String(100), unique=True, index=True)
-    username: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
-    email: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    username: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    email: Mapped[str | None] = mapped_column(String(255), nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     is_admin: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime, default=func.now(), onupdate=func.now()
     )
-    last_login: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    last_login: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
     # Relationships
     api_keys: Mapped[list["APIKey"]] = relationship(
@@ -86,8 +85,8 @@ class APIKey(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime, default=func.now(), onupdate=func.now()
     )
-    last_used: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
-    expires_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    last_used: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    expires_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     usage_count: Mapped[int] = mapped_column(default=0)  # Track usage for security
 
     # Relationships
@@ -149,7 +148,7 @@ class APIKey(Base):
         """
         if not self.expires_at:
             return False
-        return self.expires_at < datetime.now(timezone.utc)
+        return self.expires_at < datetime.now(UTC)
 
     def is_valid(self) -> bool:
         """Check if this API key is currently valid (active and not expired).
@@ -183,8 +182,8 @@ class UserSession(Base):
         String(100), ForeignKey("users.user_id"), index=True
     )
     session_id: Mapped[str] = mapped_column(String(255), unique=True, index=True)
-    ip_address: Mapped[Optional[str]] = mapped_column(String(45), nullable=True)
-    user_agent: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    ip_address: Mapped[str | None] = mapped_column(String(45), nullable=True)
+    user_agent: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now())
     last_activity: Mapped[datetime] = mapped_column(DateTime, default=func.now())
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)

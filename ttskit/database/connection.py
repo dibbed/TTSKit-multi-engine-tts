@@ -5,7 +5,8 @@ It supports SQLite (default) and PostgreSQL, with configurable echoing, pooling 
 """
 
 import os
-from typing import Any, Generator
+from collections.abc import Generator
+from typing import Any
 
 from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine

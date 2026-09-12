@@ -527,7 +527,7 @@ class TestGlobalFunctions:
     async def test_cleanup_resources(self):
         """Test cleaning up global resources."""
         pool = get_connection_pool()
-        monitor = get_performance_monitor()
+        get_performance_monitor()
 
         with patch.object(pool, "close_all") as mock_close:
             await cleanup_resources()

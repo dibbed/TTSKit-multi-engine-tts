@@ -4,8 +4,6 @@ Script to generate CHANGELOG.md from git commits
 """
 
 import subprocess
-import re
-from datetime import datetime
 
 
 def main():

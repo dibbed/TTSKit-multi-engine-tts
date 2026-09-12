@@ -18,10 +18,10 @@ VOICE_BY_LANG = {
 
 def pick_voice(lang: str) -> str:
     """Selects appropriate voice based on language code.
-    
+
     Args:
         lang: Language code (fa, ar, en)
-        
+
     Returns:
         Voice name string for the specified language, defaults to English
     """
@@ -31,7 +31,7 @@ def pick_voice(lang: str) -> str:
 
 def main() -> None:
     """Command-line interface for Edge TTS synthesis with OGG/Opus output.
-    
+
     Parses command-line arguments for text, language, and output file,
     synthesizes audio using Edge TTS engine, converts to OGG format,
     and saves the result to the specified file.

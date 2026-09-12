@@ -218,7 +218,7 @@ class TestAdapterFactory:
         assert "telethon" in all_info
         assert "telebot" in all_info
 
-        for adapter_type, info in all_info.items():
+        for _adapter_type, info in all_info.items():
             assert isinstance(info, dict)
             assert "type" in info
             assert "class" in info

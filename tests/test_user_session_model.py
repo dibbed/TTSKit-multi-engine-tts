@@ -1,7 +1,7 @@
 """Tests for ttskit.database.models.UserSession and APIKey to reach 100% coverage."""
 
 import re
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from ttskit.database.models import APIKey, UserSession
 
@@ -41,7 +41,7 @@ class TestAPIKeyModel:
         assert key.is_expired() is False
         assert key.is_valid() is True
 
-        key.expires_at = datetime.now(timezone.utc) - timedelta(seconds=1)
+        key.expires_at = datetime.now(UTC) - timedelta(seconds=1)
         assert key.is_expired() is True
         assert key.is_valid() is False
 

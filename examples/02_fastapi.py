@@ -8,7 +8,6 @@ import atexit
 import os
 import shutil
 import tempfile
-from typing import List, Optional
 
 import uvicorn
 from fastapi import FastAPI, HTTPException, Query
@@ -70,8 +69,8 @@ class SynthesisRequest(BaseModel):
         description="Text to synthesize",
     )
     lang: str = Field(default=settings.default_lang, description="Language code")
-    engine: Optional[str] = Field(default=None, description="TTS engine to use")
-    voice: Optional[str] = Field(default=None, description="Voice name")
+    engine: str | None = Field(default=None, description="TTS engine to use")
+    voice: str | None = Field(default=None, description="Voice name")
     rate: float = Field(
         default=1.0, ge=0.1, le=3.0, description="Speech rate multiplier"
     )
@@ -125,7 +124,7 @@ class BatchSynthesisRequest(BaseModel):
     texts in a single API call. Limited to 100 requests per batch.
     """
 
-    requests: List[SynthesisRequest] = Field(
+    requests: list[SynthesisRequest] = Field(
         ..., min_items=1, max_items=100, description="List of synthesis requests"
     )
 
@@ -138,15 +137,15 @@ class SynthesisResponse(BaseModel):
     """
 
     success: bool = Field(description="Whether synthesis was successful")
-    duration: Optional[float] = Field(
+    duration: float | None = Field(
         default=None, description="Audio duration in seconds"
     )
-    size: Optional[int] = Field(default=None, description="Audio size in bytes")
-    format: Optional[str] = Field(default=None, description="Audio format")
-    engine_used: Optional[str] = Field(
+    size: int | None = Field(default=None, description="Audio size in bytes")
+    format: str | None = Field(default=None, description="Audio format")
+    engine_used: str | None = Field(
         default=None, description="Engine used for synthesis"
     )
-    error: Optional[str] = Field(default=None, description="Error message if failed")
+    error: str | None = Field(default=None, description="Error message if failed")
 
 
 class BatchSynthesisResponse(BaseModel):
@@ -156,7 +155,7 @@ class BatchSynthesisResponse(BaseModel):
     statistics for successful and failed operations.
     """
 
-    results: List[SynthesisResponse] = Field(description="List of synthesis results")
+    results: list[SynthesisResponse] = Field(description="List of synthesis results")
     total: int = Field(description="Total number of requests")
     successful: int = Field(description="Number of successful requests")
     failed: int = Field(description="Number of failed requests")
@@ -258,24 +257,24 @@ def create_simple_api() -> FastAPI:
         except TextValidationError as e:
             raise HTTPException(
                 status_code=400, detail=f"Text validation failed: {str(e)}"
-            )
+            ) from e
         except EngineNotFoundError as e:
-            raise HTTPException(status_code=404, detail=f"Engine not found: {str(e)}")
+            raise HTTPException(status_code=404, detail=f"Engine not found: {str(e)}") from e
         except AudioConversionError as e:
             raise HTTPException(
                 status_code=422, detail=f"Audio conversion failed: {str(e)}"
-            )
+            ) from e
         except AllEnginesFailedError as e:
-            raise HTTPException(status_code=503, detail=f"All engines failed: {str(e)}")
+            raise HTTPException(status_code=503, detail=f"All engines failed: {str(e)}") from e
         except TTSError as e:
-            raise HTTPException(status_code=500, detail=f"TTS error: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"TTS error: {str(e)}") from e
         except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}") from e
 
     @app.get("/voices")
     async def get_voices(
-        lang: Optional[str] = Query(None, description="Filter by language"),
-        engine: Optional[str] = Query(None, description="Filter by engine"),
+        lang: str | None = Query(None, description="Filter by language"),
+        engine: str | None = Query(None, description="Filter by engine"),
     ):
         """Retrieves available voices with optional filtering.
 
@@ -402,7 +401,7 @@ def create_simple_api() -> FastAPI:
                     },
                     "supported_formats": ["ogg", "mp3", "wav"],
                     "supported_languages": list(
-                        set([e.get("lang", "en") for e in engines if e.get("lang")])
+                        {e.get("lang", "en") for e in engines if e.get("lang")}
                     ),
                 },
                 "limits": {
@@ -446,7 +445,7 @@ def create_batch_api() -> FastAPI:
         Returns:
             BatchSynthesisResponse with results for each request and summary statistics
         """
-        results: List[SynthesisResponse] = []
+        results: list[SynthesisResponse] = []
 
         for synth_request in request.requests:
             try:

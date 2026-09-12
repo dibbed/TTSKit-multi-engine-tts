@@ -8,7 +8,7 @@ from ttskit.engines.gtts_engine import GTTSEngine
 
 def simple_tts_example():
     """Demonstrates GTTSEngine usage as a standalone component without full TTSKit.
-    
+
     Shows direct engine instantiation, multi-language synthesis using Google TTS,
     file creation verification, and cleanup operations for independent usage.
     """
@@ -46,7 +46,7 @@ def simple_tts_example():
 
 def language_mapping_example():
     """Displays the language mapping used by GTTSEngine for Google TTS compatibility.
-    
+
     Shows how different language codes are mapped to Google TTS-compatible
     language identifiers for proper synthesis across various languages.
     """

@@ -154,7 +154,7 @@ class HealthChecker:
                 "error": "FFmpeg check timed out",
             }
             return False
-        except asyncio.TimeoutError:
+        except TimeoutError:
             self.checks["ffmpeg"] = False
             self.details["ffmpeg"] = {
                 "available": False,

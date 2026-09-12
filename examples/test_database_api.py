@@ -12,7 +12,7 @@ Notes:
 import asyncio
 import sys
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 import aiohttp
 
@@ -68,7 +68,7 @@ class DatabaseAPITester:
         self.created_api_key = None
         self.created_resources = []
 
-    async def test_server_connection(self) -> Dict[str, Any]:
+    async def test_server_connection(self) -> dict[str, Any]:
         """Tests server connection and health status with timeout handling.
 
         Sends a GET to /system/health and checks response.
@@ -99,14 +99,14 @@ class DatabaseAPITester:
                             "status": response.status,
                             "warning": "Server not healthy",
                         }
-        except asyncio.TimeoutError:
+        except TimeoutError:
             print("❌ Server connection timeout")
             return {"error": "Connection timeout"}
         except Exception as e:
             print(f"❌ Server connection failed: {e}")
             return {"error": str(e)}
 
-    async def test_list_users(self) -> Dict[str, Any]:
+    async def test_list_users(self) -> dict[str, Any]:
         """Tests user listing functionality.
 
         Fetches all users from /admin/users and prints count/details.
@@ -137,7 +137,7 @@ class DatabaseAPITester:
             print(f"❌ Error in list users test: {e}")
             return {"error": str(e)}
 
-    async def test_create_user(self) -> Dict[str, Any]:
+    async def test_create_user(self) -> dict[str, Any]:
         """Tests user creation functionality.
 
         POSTs a random test user to /admin/users and tracks for cleanup.
@@ -189,7 +189,7 @@ class DatabaseAPITester:
             print(f"❌ Error in create user test: {e}")
             return {"error": str(e)}
 
-    async def test_get_user(self) -> Dict[str, Any]:
+    async def test_get_user(self) -> dict[str, Any]:
         """Tests user retrieval functionality.
 
         GETs a specific user (created or default 'admin') from /admin/users/{user_id}.
@@ -218,7 +218,7 @@ class DatabaseAPITester:
             print(f"❌ Error in get user test: {e}")
             return {"error": str(e)}
 
-    async def test_create_api_key(self) -> Dict[str, Any]:
+    async def test_create_api_key(self) -> dict[str, Any]:
         """Tests API key creation functionality.
 
         POSTs API key for a user (created or 'admin') to /admin/api-keys with read/write perms.
@@ -259,7 +259,7 @@ class DatabaseAPITester:
             print(f"❌ Error in create API key test: {e}")
             return {"error": str(e)}
 
-    async def test_list_api_keys(self) -> Dict[str, Any]:
+    async def test_list_api_keys(self) -> dict[str, Any]:
         """Tests API keys listing functionality.
 
         GETs all API keys from /admin/api-keys and prints user/key details.
@@ -291,7 +291,7 @@ class DatabaseAPITester:
             print(f"❌ Error in list API keys test: {e}")
             return {"error": str(e)}
 
-    async def test_get_current_user(self) -> Dict[str, Any]:
+    async def test_get_current_user(self) -> dict[str, Any]:
         """Tests retrieval of current user info.
 
         GETs /admin/users/me and prints user_id/permissions.
@@ -319,7 +319,7 @@ class DatabaseAPITester:
             print(f"❌ Error in get current user test: {e}")
             return {"error": str(e)}
 
-    async def test_delete_user(self) -> Dict[str, Any]:
+    async def test_delete_user(self) -> dict[str, Any]:
         """Tests user deletion functionality.
 
         DELETEs the created user from /admin/users/{user_id}; skips if none created.
@@ -351,7 +351,7 @@ class DatabaseAPITester:
             print(f"❌ Error in delete user test: {e}")
             return {"error": str(e)}
 
-    async def cleanup_created_resources(self) -> Dict[str, Any]:
+    async def cleanup_created_resources(self) -> dict[str, Any]:
         """Cleans up all resources created during tests.
 
         Deletes API keys then users in reverse order, reporting per-resource success.
@@ -436,7 +436,7 @@ class DatabaseAPITester:
                 ]:  # 404 is OK (already deleted)
                     raise Exception(f"Failed to delete user: {response.status}")
 
-    async def run_all_tests(self) -> Dict[str, Any]:
+    async def run_all_tests(self) -> dict[str, Any]:
         """Runs all database API tests in sequence.
 
         Executes connection, list/create/get/delete ops for users/keys, and current user fetch.

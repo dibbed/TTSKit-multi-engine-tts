@@ -24,7 +24,7 @@ from ttskit.utils.performance import (
 
 async def test_performance_optimization():
     """Tests performance optimization features including connection pooling and parallel processing.
-    
+
     Validates connection pool functionality, parallel processing capabilities,
     and memory optimization monitoring with comprehensive error handling.
     """
@@ -55,10 +55,10 @@ async def test_performance_optimization():
 
     async def test_task(item):
         """Simulates processing task with artificial delay.
-        
+
         Args:
             item: Item to process
-            
+
         Returns:
             Processed item string
         """
@@ -84,7 +84,7 @@ async def test_performance_optimization():
 
 async def test_advanced_metrics():
     """Tests advanced metrics collection including request tracking and analytics.
-    
+
     Validates metrics recording, error tracking, cache event monitoring,
     system metrics collection, and comprehensive analytics generation.
     """
@@ -132,7 +132,7 @@ async def test_advanced_metrics():
 
 async def test_admin_panel():
     """Tests admin panel functionality with unified bot and command registries.
-    
+
     Validates unified bot initialization, admin user management, command registry
     setup, and access control mechanisms for administrative functions.
     """
@@ -175,7 +175,7 @@ async def test_admin_panel():
 
 async def test_integration():
     """Tests integration between performance monitoring and metrics collection components.
-    
+
     Validates cross-component data recording, metrics retrieval consistency,
     and resource cleanup functionality across integrated systems.
     """
@@ -205,7 +205,7 @@ async def test_integration():
 
 async def main():
     """Runs comprehensive test suite for TTSKit advanced features.
-    
+
     Executes performance optimization, metrics collection, admin panel,
     and integration tests with error handling and result reporting.
     """

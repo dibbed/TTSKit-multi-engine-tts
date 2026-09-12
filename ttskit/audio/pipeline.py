@@ -43,7 +43,7 @@ except ImportError:
     SCIPY_AVAILABLE = False
 
 try:
-    import soundfile
+    import soundfile  # noqa: F401
 
     SOUNDFILE_AVAILABLE = True
 except ImportError:
