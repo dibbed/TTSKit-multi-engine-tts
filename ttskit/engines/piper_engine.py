@@ -22,6 +22,8 @@ try:
 
     PIPER_AVAILABLE = True
 except ImportError:
+    PiperVoice = None
+    SynthesisConfig = None
     PIPER_AVAILABLE = False
 
 
