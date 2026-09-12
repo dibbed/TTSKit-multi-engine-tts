@@ -1654,15 +1654,18 @@ async def admin_test_engines(bot, message: TelegramMessage, _: str) -> None:
 
         await bot.awaitable(bot.adapter.send_message)(chat_id, t("testing_all_engines"))
 
-        engines = ["edge", "piper", "gtts"]
+        from ..engines.probe import probe_all_engines
+
+        probe_results = await probe_all_engines()
         results = []
 
-        for engine in engines:
-            try:
-                await asyncio.sleep(1)
-                results.append(f"✅ {engine}: OK")
-            except Exception as e:
-                results.append(f"❌ {engine}: {str(e)}")
+        for r in probe_results:
+            if r.status == "ok":
+                results.append(f"✅ {r.engine}: OK")
+            elif r.status == "not_configured":
+                results.append(f"⚠️ {r.engine}: {r.message}")
+            else:
+                results.append(f"❌ {r.engine}: {r.message}")
 
         text = t("engine_test_results_with_list", results="\n".join(results))
         await bot.awaitable(bot.adapter.send_message)(chat_id, text)

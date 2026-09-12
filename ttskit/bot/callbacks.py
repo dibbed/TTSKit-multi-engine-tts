@@ -900,104 +900,74 @@ async def cancel_restart_callback(bot, message, data):
 
 # Engine testing callbacks
 async def test_all_engines_callback(bot, message, data):
-    """Tests all configured TTS engines and reports results to the admin.
-
-    Sends progress message, simulates tests for each engine (edge, piper, gtts) with
-    a 1-second delay, collects success/failure results, and sends a formatted list.
-
-    Args:
-        bot: The bot instance for sending messages.
-        message: The message object triggering the callback.
-        data: The callback data (unused here).
-
-    Notes:
-        Current implementation uses asyncio.sleep(1) as placeholder for actual engine testing.
-        Replace with real synth tests. Results bilingual with emojis.
-    """
+    """Tests all configured TTS engines using real health probes and reports results."""
     await bot.awaitable(bot.adapter.send_message)(
         message.chat_id, t("testing_all_engines_progress")
     )
 
-    engines = ["edge", "piper", "gtts"]
+    from ..engines.probe import probe_all_engines
+
+    probe_results = await probe_all_engines()
     results = []
 
-    for engine in engines:
-        try:
-            import asyncio
-
-            await asyncio.sleep(1)
-            results.append(f"✅ {engine}: OK")
-        except Exception as e:
-            results.append(f"❌ {engine}: {str(e)}")
+    for r in probe_results:
+        if r.status == "ok":
+            results.append(f"✅ {r.engine}: OK")
+        elif r.status == "not_configured":
+            results.append(f"⚠️ {r.engine}: {r.message}")
+        else:
+            results.append(f"❌ {r.engine}: {r.message}")
 
     text = t("engine_test_results_with_list", results="\n".join(results))
     await bot.awaitable(bot.adapter.send_message)(message.chat_id, text)
 
 
 async def test_edge_callback(bot, message, data):
-    """Tests the Edge TTS engine specifically.
-
-    Sends progress and completion messages; placeholder for actual Edge engine test.
-
-    Args:
-        bot: The bot instance for sending messages.
-        message: The message object triggering the callback.
-        data: The callback data (unused here).
-
-    Notes:
-        Placeholder implementation—replace with real Edge TTS synthesis test.
-        Uses i18n for bilingual progress/complete messages.
-    """
+    """Tests the Edge TTS engine specifically with real synthesis probe."""
     await bot.awaitable(bot.adapter.send_message)(
         message.chat_id, t("testing_engine_progress", engine_name="Edge")
     )
 
+    from ..engines.probe import probe_engine
+
+    res = await probe_engine("edge")
+    status_suffix = f"\n✅ {res.message}" if res.status == "ok" else f"\n❌ {res.message}"
+
     await bot.awaitable(bot.adapter.send_message)(
-        message.chat_id, t("testing_engine_complete", engine_name="Edge")
+        message.chat_id,
+        f"{t('testing_engine_complete', engine_name='Edge')}{status_suffix}",
     )
 
 
 async def test_piper_callback(bot, message, data):
-    """Tests the Piper TTS engine specifically.
-
-    Sends progress and completion messages; placeholder for actual Piper engine test.
-
-    Args:
-        bot: The bot instance for sending messages.
-        message: The message object triggering the callback.
-        data: The callback data (unused here).
-
-    Notes:
-        Placeholder implementation—replace with real Piper TTS synthesis test.
-        Uses i18n for bilingual progress/complete messages.
-    """
+    """Tests the Piper TTS engine specifically with real synthesis probe."""
     await bot.awaitable(bot.adapter.send_message)(
         message.chat_id, t("testing_engine_progress", engine_name="Piper")
     )
 
+    from ..engines.probe import probe_engine
+
+    res = await probe_engine("piper")
+    status_suffix = f"\n✅ {res.message}" if res.status == "ok" else f"\n❌ {res.message}"
+
     await bot.awaitable(bot.adapter.send_message)(
-        message.chat_id, t("testing_engine_complete", engine_name="Piper")
+        message.chat_id,
+        f"{t('testing_engine_complete', engine_name='Piper')}{status_suffix}",
     )
 
 
 async def test_gtts_callback(bot, message, data):
-    """Tests the GTTS TTS engine specifically.
-
-    Sends progress and completion messages; placeholder for actual GTTS engine test.
-
-    Args:
-        bot: The bot instance for sending messages.
-        message: The message object triggering the callback.
-        data: The callback data (unused here).
-
-    Notes:
-        Placeholder implementation—replace with real GTTS TTS synthesis test.
-        Uses i18n for bilingual progress/complete messages.
-    """
+    """Tests the GTTS TTS engine specifically with real synthesis probe."""
     await bot.awaitable(bot.adapter.send_message)(
         message.chat_id, t("testing_engine_progress", engine_name="GTTS")
     )
 
+    from ..engines.probe import probe_engine
+
+    res = await probe_engine("gtts")
+    status_suffix = f"\n✅ {res.message}" if res.status == "ok" else f"\n❌ {res.message}"
+
     await bot.awaitable(bot.adapter.send_message)(
-        message.chat_id, t("testing_engine_complete", engine_name="GTTS")
+        message.chat_id,
+        f"{t('testing_engine_complete', engine_name='GTTS')}{status_suffix}",
     )
