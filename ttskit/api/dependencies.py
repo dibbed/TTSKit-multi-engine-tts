@@ -109,7 +109,7 @@ async def verify_api_key(
 
                 logger.info("API key verified from config for user: %s", user_id)
                 return APIKeyAuth(
-                    api_key=None,
+                    api_key=api_key,
                     user_id=user_id,
                     permissions=permissions,
                     is_admin=is_admin,
@@ -119,7 +119,7 @@ async def verify_api_key(
     if hasattr(settings, "api_key") and settings.api_key and secrets.compare_digest(api_key, settings.api_key):
         logger.info("API key verified from config (single key)")
         return APIKeyAuth(
-            api_key=None,
+            api_key=api_key,
             user_id="api-user",
             permissions=["read", "write"],
             is_admin=False,
@@ -135,7 +135,7 @@ async def verify_api_key(
                 "API key verified from database for user: %s", user_info["user_id"]
             )
             return APIKeyAuth(
-                api_key=None,
+                api_key=api_key,
                 user_id=user_info["user_id"],
                 permissions=user_info["permissions"],
                 is_admin=bool(user_info.get("is_admin", False)),
