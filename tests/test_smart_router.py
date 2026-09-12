@@ -238,3 +238,61 @@ class TestSmartRouter:
 
         assert "engine1" in filtered_engines
         assert "engine2" not in filtered_engines
+
+    def test_synth_sync(self, smart_router):
+        """Test synchronous synth wrapper."""
+        mock_engine = Mock()
+        mock_engine.synth_async.return_value = b"sync_audio"
+        smart_router.registry.get_engine.return_value = mock_engine
+        smart_router.select_best_engine = Mock(return_value="gtts")
+
+        audio_data, engine_name = smart_router.synth("Hello", "en")
+        assert audio_data == b"sync_audio"
+        assert engine_name == "gtts"
+
+    def test_select_engine_and_requirements(self, smart_router):
+        """Test select_engine and requirement checks."""
+        mock_engine = Mock()
+        mock_engine.is_available.return_value = True
+        smart_router.registry.get_engine.return_value = mock_engine
+        smart_router.registry.meets_requirements.return_value = True
+        smart_router.registry.get_available_engines.return_value = ["gtts", "edge"]
+
+        engine = smart_router.select_engine("en", {"offline": True})
+        assert engine == "gtts"
+
+        # When requirements are not met
+        smart_router.registry.meets_requirements.return_value = False
+        engine_none = smart_router.select_engine("en", {"offline": True})
+        assert engine_none is None
+
+    def test_record_success_and_failure(self, smart_router):
+        """Test tracking performance metrics on success and failure."""
+        smart_router.record_success("gtts", 0.5)
+        smart_router.record_success("gtts", 0.3)
+        smart_router.record_failure("gtts")
+
+        stats = smart_router.get_engine_stats("gtts")
+        assert stats["total_requests"] == 2
+        assert stats["failures"] == 1
+        assert stats["min_duration"] == 0.3
+        assert stats["max_duration"] == 0.5
+        assert stats["success_rate"] == 2 / 3
+
+    def test_synth_async_fallback_to_engines_dict(self, smart_router):
+        """Test fallback when get_engine raises but registry.engines has the engine."""
+        mock_engine = Mock()
+        mock_engine.is_available.return_value = True
+        mock_engine.synth_async.return_value = b"fallback_audio"
+
+        smart_router.registry.get_engine.side_effect = Exception("Not in get_engine")
+        smart_router.registry.engines = {"gtts": mock_engine}
+        smart_router.select_best_engine = Mock(return_value="gtts")
+        smart_router.registry.meets_requirements.return_value = True
+
+        import asyncio
+
+        audio, name = asyncio.run(smart_router.synth_async("Hello", "en"))
+        assert audio == b"fallback_audio"
+        assert name == "gtts"
+

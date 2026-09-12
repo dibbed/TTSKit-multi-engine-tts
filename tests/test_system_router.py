@@ -721,3 +721,12 @@ class TestSystemRouterPerformance:
 
             assert result.enabled is True
             assert (end_time - start_time) < 0.5
+
+    @pytest.mark.asyncio
+    async def test_get_version(self, mock_auth):
+        """Test get_version endpoint."""
+        resp = await get_version(mock_auth)
+        assert resp["service"] == "TTSKit API"
+        assert "version" in resp
+        assert resp["status"] == "running"
+

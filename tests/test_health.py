@@ -1170,3 +1170,25 @@ class TestGlobalHealthFunctions:
             assert result.name == "engines_health"
             assert result.status is False
             assert "Factory error" in result.message
+
+    @pytest.mark.asyncio
+    async def test_health_run_all_checks_with_monkeypatch(self, monkeypatch):
+        """Tests HealthChecker run_all_checks under mocked conditions."""
+        hc = HealthChecker()
+
+        async def mock_check():
+            return True
+
+        monkeypatch.setattr(hc, "check_ffmpeg", mock_check)
+        monkeypatch.setattr(hc, "check_engines", mock_check)
+        monkeypatch.setattr(hc, "check_redis", mock_check)
+        monkeypatch.setattr(hc, "check_configuration", mock_check)
+        monkeypatch.setattr(hc, "check_temp_directory", mock_check)
+        monkeypatch.setattr(hc, "check_cache", mock_check)
+        monkeypatch.setattr(hc, "check_metrics", mock_check)
+        monkeypatch.setattr(hc, "check_performance", mock_check)
+
+        result = await hc.run_all_checks()
+        assert result["overall"] is True
+        assert all(result["checks"].values())
+

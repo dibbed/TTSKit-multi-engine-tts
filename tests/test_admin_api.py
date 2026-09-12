@@ -98,23 +98,24 @@ class TestAdminAPIEndpoints:
         mock_api_key.usage_count = 0
         mock_api_key.api_key_plain = "mock_api_key_123"
 
-        mock_created_api_key = {
-            "id": 1,
-            "user_id": "test_user",
-            "permissions": ["read", "write"],
-            "is_active": True,
-            "created_at": datetime(2024, 1, 1, 0, 0, 0),
-            "last_used": None,
-            "expires_at": None,
-            "usage_count": 0,
-            "api_key": "mock_api_key_123",
-        }
+        async def fake_create_api_key(user_id, **kwargs):
+            return {
+                "id": 1,
+                "user_id": user_id,
+                "permissions": kwargs.get("permissions") or ["read", "write"],
+                "is_active": True,
+                "created_at": datetime(2024, 1, 1, 0, 0, 0),
+                "last_used": None,
+                "expires_at": kwargs.get("expires_at"),
+                "usage_count": 0,
+                "api_key": "mock_api_key_123",
+            }
 
         mock_service.get_user_by_id = AsyncMock(return_value=mock_user)
         mock_service.get_all_users = AsyncMock(return_value=[mock_user])
         mock_service.create_user = AsyncMock(return_value=mock_user)
         mock_service.get_user_api_keys = AsyncMock(return_value=[mock_api_key])
-        mock_service.create_api_key = AsyncMock(return_value=mock_created_api_key)
+        mock_service.create_api_key = AsyncMock(side_effect=fake_create_api_key)
         mock_service.update_api_key = AsyncMock(return_value=mock_api_key)
         mock_service.delete_user = AsyncMock(return_value=True)
         mock_service.delete_api_key = AsyncMock(return_value=True)
