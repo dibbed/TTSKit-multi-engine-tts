@@ -15,7 +15,7 @@ class TTSKitAPIClient:
     """
 
     def __init__(
-        self, base_url: str = "http://localhost:8000", api_key: str = "demo-key"
+        self, base_url: str = "http://localhost:8080", api_key: str = "your-api-key"
     ):
         """Initializes API client with authentication credentials.
 
@@ -93,10 +93,10 @@ async def test_multiple_api_keys():
     print("=" * 50)
 
     api_keys = {
-        "ali": "ali-secret-key",
-        "admin": "admin-secret",
-        "readonly_user": "readonly-key",
-        "demo-user": "demo-key",
+        "ali": "sample-user-key",
+        "admin": "sample-admin-key",
+        "readonly_user": "sample-readonly-key",
+        "api-user": "sample-api-user-key",
     }
 
     for user_id, api_key in api_keys.items():
@@ -141,10 +141,9 @@ async def test_environment_config():
     env_example = {
         "TTSKIT_API_KEYS": json.dumps(
             {
-                "ali": "ali-secret-key",
-                "admin": "admin-secret",
-                "readonly_user": "readonly-key",
-                "demo-user": "demo-key",
+                "user1": "CHANGE_ME_USER1_KEY",
+                "admin": "CHANGE_ME_ADMIN_KEY",
+                "readonly_user": "CHANGE_ME_READONLY_KEY",
             }
         ),
         "TTSKIT_ENABLE_AUTH": "true",
@@ -156,7 +155,7 @@ async def test_environment_config():
         print(f"export {key}='{value}'")
 
     print("\nOr create a .env file:")
-    print('TTSKIT_API_KEYS={"ali": "ali-secret-key", "admin": "admin-secret"}')
+    print('TTSKIT_API_KEYS={"user1": "CHANGE_ME_USER1_KEY", "admin": "CHANGE_ME_ADMIN_KEY"}')
     print("TTSKIT_ENABLE_AUTH=true")
     print("TTSKIT_API_RATE_LIMIT=100")
 

@@ -10,8 +10,14 @@ import os
 import re
 from typing import Any
 
-from pydantic import Field, field_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import Field, field_validator, model_validator
+from pydantic_settings import (
+    BaseSettings,
+    DotEnvSettingsSource,
+    EnvSettingsSource,
+    PydanticBaseSettingsSource,
+    SettingsConfigDict,
+)
 
 from .exceptions import ConfigurationError
 
@@ -36,6 +42,47 @@ class Settings(BaseSettings):
         case_sensitive=False,
         extra="allow",
     )
+
+    @classmethod
+    def settings_customise_sources(
+        cls,
+        settings_cls: type[BaseSettings],
+        init_settings: PydanticBaseSettingsSource,
+        env_settings: PydanticBaseSettingsSource,
+        dotenv_settings: PydanticBaseSettingsSource,
+        file_secret_settings: PydanticBaseSettingsSource,
+    ) -> tuple[PydanticBaseSettingsSource, ...]:
+        """Support both unprefixed and TTSKIT_ prefixed environment variables."""
+        return (
+            init_settings,
+            env_settings,
+            EnvSettingsSource(settings_cls, env_prefix="TTSKIT_"),
+            dotenv_settings,
+            DotEnvSettingsSource(settings_cls, env_file=".env", env_prefix="TTSKIT_"),
+            file_secret_settings,
+        )
+
+    @model_validator(mode="before")
+    @classmethod
+    def handle_prefixed_and_legacy_env_vars(cls, data: Any) -> Any:
+        """Map legacy and aliased environment variables."""
+        if isinstance(data, dict):
+            rate_env = os.environ.get("TTSKIT_RATE_LIMITING") or os.environ.get("RATE_LIMITING")
+            if rate_env is not None:
+                data.setdefault("enable_rate_limiting", rate_env.lower() in ("true", "1", "yes"))
+            cache_env = os.environ.get("TTSKIT_CACHE_ENABLED") or os.environ.get("CACHE_ENABLED")
+            if cache_env is not None:
+                is_cached = cache_env.lower() in ("true", "1", "yes")
+                data.setdefault("cache_enabled", is_cached)
+                data.setdefault("enable_caching", is_cached)
+            log_env = (
+                os.environ.get("TTSKIT_LOG_LEVEL")
+                or os.environ.get("LOG_LEVEL")
+                or (data.get("log_level") if isinstance(data, dict) else None)
+            )
+            if log_env is not None and isinstance(log_env, str):
+                data["log_level"] = log_env.upper()
+        return data
 
     bot_token: str | None = Field(
         default=None, description="Telegram bot token (required for bot mode)"

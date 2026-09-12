@@ -66,7 +66,7 @@ export API_KEY="your-secret-key"
 export ENABLE_AUTH=true
 
 # Multiple API keys with permissions (JSON)
-export API_KEYS='{"admin": "admin-secret-key", "user1": "user1-key", "readonly_user": "readonly-key"}'
+export API_KEYS='{"admin": "CHANGE_ME_ADMIN_KEY", "user1": "CHANGE_ME_USER1_KEY", "readonly_user": "CHANGE_ME_READONLY_KEY"}'
 ```
 
 ### Permission Levels
@@ -780,7 +780,7 @@ CORS_ORIGINS=["*"]
 ALLOWED_HOSTS=["*"]
 
 # Multiple API Keys (JSON format)
-API_KEYS='{"admin": "admin-secret-key", "user1": "user1-key", "readonly_user": "readonly-key"}'
+API_KEYS='{"admin": "CHANGE_ME_ADMIN_KEY", "user1": "CHANGE_ME_USER1_KEY", "readonly_user": "CHANGE_ME_READONLY_KEY"}'
 
 # TTS Configuration
 DEFAULT_LANG=en

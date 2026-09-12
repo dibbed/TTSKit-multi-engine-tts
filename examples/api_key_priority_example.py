@@ -24,7 +24,7 @@ async def test_api_key_priority():
     test_cases = [
         {
             "name": "Admin key from config",
-            "api_key": "admin-secret",
+            "api_key": "sample-admin-token-12345",
             "expected_user": "admin",
             "expected_permissions": ["read", "write", "admin"],
         },
@@ -42,8 +42,8 @@ async def test_api_key_priority():
         },
         {
             "name": "Single API key from config",
-            "api_key": "demo-key",
-            "expected_user": "demo-user",
+            "api_key": "sample-single-token-12345",
+            "expected_user": "api-user",
             "expected_permissions": ["read", "write"],
         },
     ]
@@ -52,16 +52,16 @@ async def test_api_key_priority():
     original_api_key = getattr(settings, "api_key", None)
 
     settings.api_keys = {
-        "admin": "admin-secret",
+        "admin": "sample-admin-token-12345",
         "user1": "user1-key",
         "readonly_test": "readonly-key",
     }
-    settings.api_key = "demo-key"
+    settings.api_key = "sample-single-token-12345"
 
     try:
         for test_case in test_cases:
             print(f"\n🧪 Testing: {test_case['name']}")
-            print(f"   Key: {test_case['api_key'][:10]}...")
+            print("   Key: [MASKED]")
 
             try:
                 db_session = next(get_session())
@@ -118,7 +118,7 @@ async def test_invalid_keys():
 
     for invalid_key in invalid_keys:
         print(
-            f"\n🧪 Testing invalid key: {invalid_key[:10] if invalid_key else 'empty'}..."
+            f"\n🧪 Testing invalid key: {'[non-empty key]' if invalid_key else 'empty'}"
         )
 
         try:

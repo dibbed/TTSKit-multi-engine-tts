@@ -16,7 +16,7 @@ class TTSKitAPIClient:
     """
 
     def __init__(
-        self, base_url: str = "http://localhost:8000", api_key: str = "demo-key"
+        self, base_url: str = "http://localhost:8080", api_key: str = "your-api-key"
     ):
         """Initializes API client with base URL and authentication.
 

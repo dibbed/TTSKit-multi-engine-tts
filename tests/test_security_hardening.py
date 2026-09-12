@@ -224,3 +224,23 @@ def test_admin_endpoints_sanitize_500_exceptions():
         assert res.status_code == 500
         assert "SECRET_INTERNAL_DB_CRASH_INFO" not in res.text
         assert res.json()["detail"] == "Internal server error"
+
+
+def test_ttskit_prefixed_environment_variables(monkeypatch):
+    """Verify that TTSKIT_ prefixed environment variables configure Settings properly."""
+    from ttskit.config import Settings
+
+    monkeypatch.setenv("TTSKIT_BOT_TOKEN", "123456789:ABCdefGHIjklMNOpqrsTUVwxyz123456789")
+    monkeypatch.setenv("TTSKIT_RATE_LIMITING", "true")
+    monkeypatch.setenv("TTSKIT_CACHE_ENABLED", "false")
+    monkeypatch.setenv("TTSKIT_LOG_LEVEL", "warning")
+    monkeypatch.setenv("TTSKIT_API_PORT", "9090")
+
+    s = Settings()
+    assert s.bot_token == "123456789:ABCdefGHIjklMNOpqrsTUVwxyz123456789"
+    assert s.enable_rate_limiting is True
+    assert s.cache_enabled is False
+    assert s.enable_caching is False
+    assert s.log_level == "WARNING"
+    assert s.api_port == 9090
+

@@ -12,10 +12,10 @@ API keys defined in environment variables or `.env` file:
 
 ```bash
 # Single API key
-API_KEY=admin-secret-key
+API_KEY=CHANGE_ME_ADMIN_KEY
 
 # Multiple API keys (JSON format)
-API_KEYS={"admin": "admin-secret", "user1": "user1-key", "readonly_user": "readonly-key"}
+API_KEYS={"admin": "CHANGE_ME_ADMIN_KEY", "user1": "CHANGE_ME_USER1_KEY", "readonly_user": "CHANGE_ME_READONLY_KEY"}
 ```
 
 ### 2. **Database Storage (Lower Priority)**
@@ -136,7 +136,7 @@ API_KEYS={"admin": "admin-prod-key"}  # Only for super admin
 
 ```bash
 # Single admin key
-API_KEY=admin-secret-123
+API_KEY=CHANGE_ME_ADMIN_KEY
 ```
 
 ### Multi-User Setup
@@ -144,9 +144,9 @@ API_KEY=admin-secret-123
 ```bash
 # Multiple users with different permissions
 API_KEYS={
-  "admin": "admin-secret-123",
-  "api_user": "api-user-key-456",
-  "readonly_monitor": "monitor-key-789"
+  "admin": "CHANGE_ME_ADMIN_KEY",
+  "api_user": "CHANGE_ME_API_USER_KEY",
+  "readonly_monitor": "CHANGE_ME_MONITOR_KEY"
 }
 ```
 
@@ -154,8 +154,8 @@ API_KEYS={
 
 ```bash
 # Only super admin in config, others in database
-API_KEY=super-admin-key
-API_KEYS={"admin": "super-admin-key"}
+API_KEY=CHANGE_ME_SUPER_ADMIN_KEY
+API_KEYS={"admin": "CHANGE_ME_SUPER_ADMIN_KEY"}
 ```
 
 ## Troubleshooting
