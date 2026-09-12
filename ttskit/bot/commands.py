@@ -831,6 +831,7 @@ class CommandRegistry:
                     )
                 return
 
+            db_session = None
             try:
                 from ..database.connection import get_session
                 from ..services.user_service import UserService
@@ -884,6 +885,11 @@ class CommandRegistry:
                     bot.adapter.send_message(
                         message.chat_id, f"❌ **خطا در ایجاد کلید**\n\n{str(e)}"
                     )
+            finally:
+                if db_session is not None and hasattr(db_session, "close"):
+                    res = db_session.close()
+                    if hasattr(res, "__await__"):
+                        await res
 
         async def admin_list_keys(message: TelegramMessage, _: str) -> None:
             """Handles /list_keys command to display all API keys.
@@ -898,6 +904,7 @@ class CommandRegistry:
             if not await _require_sudo(message):
                 return
 
+            db_session = None
             try:
                 from ..database.connection import get_session
                 from ..services.user_service import UserService
@@ -954,6 +961,11 @@ class CommandRegistry:
                     bot.adapter.send_message(
                         message.chat_id, f"❌ **خطا در دریافت لیست**\n\n{str(e)}"
                     )
+            finally:
+                if db_session is not None and hasattr(db_session, "close"):
+                    res = db_session.close()
+                    if hasattr(res, "__await__"):
+                        await res
 
         async def admin_delete_key(message: TelegramMessage, args: str) -> None:
             """Handles /delete_key command to remove an API key.
@@ -1000,6 +1012,7 @@ class CommandRegistry:
                     )
                 return
 
+            db_session = None
             try:
                 from ..database.connection import get_session
                 from ..services.user_service import UserService
@@ -1079,6 +1092,11 @@ class CommandRegistry:
                     bot.adapter.send_message(
                         message.chat_id, f"❌ **خطا در حذف کلید**\n\n{str(e)}"
                     )
+            finally:
+                if db_session is not None and hasattr(db_session, "close"):
+                    res = db_session.close()
+                    if hasattr(res, "__await__"):
+                        await res
 
         async def admin_system_stats(message: TelegramMessage, _: str) -> None:
             """Handles /system_stats command to display detailed system metrics.
@@ -1690,6 +1708,7 @@ async def admin_create_user(bot, message: TelegramMessage, args: str) -> None:
         args: Arguments like 'user_id:123 username:Test email:test@example.com admin:true'.
 
     """
+    db_session = None
     try:
         args_list = args.split() if args else []
 
@@ -1760,6 +1779,11 @@ async def admin_create_user(bot, message: TelegramMessage, args: str) -> None:
         await bot.awaitable(bot.adapter.send_message)(
             chat_id, f"❌ **خطا در ایجاد کاربر**\n\n{str(e)}"
         )
+    finally:
+        if db_session is not None and hasattr(db_session, "close"):
+            res = db_session.close()
+            if hasattr(res, "__await__"):
+                await res
 
 
 async def admin_delete_user(bot, message: TelegramMessage, args: str) -> None:
@@ -1773,6 +1797,7 @@ async def admin_delete_user(bot, message: TelegramMessage, args: str) -> None:
         args: Arguments like 'user_id:123'.
 
     """
+    db_session = None
     try:
         args_list = args.split() if args else []
 
@@ -1833,6 +1858,11 @@ async def admin_delete_user(bot, message: TelegramMessage, args: str) -> None:
         await bot.awaitable(bot.adapter.send_message)(
             chat_id, f"❌ **خطا در حذف کاربر**\n\n{str(e)}"
         )
+    finally:
+        if db_session is not None and hasattr(db_session, "close"):
+            res = db_session.close()
+            if hasattr(res, "__await__"):
+                await res
 
 
 async def admin_list_users(bot, message: TelegramMessage, _: str) -> None:
@@ -1846,6 +1876,7 @@ async def admin_list_users(bot, message: TelegramMessage, _: str) -> None:
         _: Ignored args.
 
     """
+    db_session = None
     try:
         from ..database.connection import get_session
         from ..services.user_service import UserService
@@ -1882,6 +1913,11 @@ async def admin_list_users(bot, message: TelegramMessage, _: str) -> None:
         await bot.awaitable(bot.adapter.send_message)(
             chat_id, f"❌ **خطا در دریافت لیست کاربران**\n\n{str(e)}"
         )
+    finally:
+        if db_session is not None and hasattr(db_session, "close"):
+            res = db_session.close()
+            if hasattr(res, "__await__"):
+                await res
 
 
 async def admin_clear_cache(bot, message: TelegramMessage, _: str) -> None:

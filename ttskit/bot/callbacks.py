@@ -645,6 +645,7 @@ async def list_keys_callback(bot, message, data):
         Displays 'فعال' (active) or 'غیرفعال' (inactive) for status. If no users/keys,
         sends a 'no API keys' message. Permissions parsed from JSON.
     """
+    db_session = None
     try:
         from ..database.connection import get_session
         from ..services.user_service import UserService
@@ -684,6 +685,11 @@ async def list_keys_callback(bot, message, data):
         await bot.awaitable(bot.adapter.send_message)(
             message.chat_id, f"❌ **خطا در دریافت لیست**\n\n{str(e)}"
         )
+    finally:
+        if db_session is not None and hasattr(db_session, "close"):
+            res = db_session.close()
+            if hasattr(res, "__await__"):
+                await res
 
 
 async def delete_key_callback(bot, message, data):
@@ -724,6 +730,7 @@ async def _create_api_key_with_permissions(bot, message, permissions):
         User_id format: "telegram_{user.id}_{timestamp}". Username and email are auto-generated.
         is_admin set if "admin" in permissions. Error messages in Persian.
     """
+    db_session = None
     try:
         from datetime import datetime
 
@@ -763,6 +770,11 @@ async def _create_api_key_with_permissions(bot, message, permissions):
         await bot.awaitable(bot.adapter.send_message)(
             message.chat_id, f"❌ **خطا در ایجاد کلید**\n\n{str(e)}"
         )
+    finally:
+        if db_session is not None and hasattr(db_session, "close"):
+            res = db_session.close()
+            if hasattr(res, "__await__"):
+                await res
 
 
 async def delete_key_confirm_callback(bot, message, data):
@@ -780,6 +792,7 @@ async def delete_key_confirm_callback(bot, message, data):
         User_id extracted by splitting data after "delete_key_confirm_". Deletes only the
         first key if multiple exist. Errors if no keys or deletion fails.
     """
+    db_session = None
     try:
         user_id = data.split("delete_key_confirm_")[1]
 
@@ -817,6 +830,11 @@ async def delete_key_confirm_callback(bot, message, data):
         await bot.awaitable(bot.adapter.send_message)(
             message.chat_id, f"❌ **خطا در حذف کلید**\n\n{str(e)}"
         )
+    finally:
+        if db_session is not None and hasattr(db_session, "close"):
+            res = db_session.close()
+            if hasattr(res, "__await__"):
+                await res
 
 
 # Cache management callbacks
