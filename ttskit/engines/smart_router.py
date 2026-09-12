@@ -555,9 +555,8 @@ class SmartRouter:
                 continue
         return filtered
 
-    # Backward-compatibility for tests expecting this method
     def _update_stats(self, success: bool) -> None:
-        """Update aggregate stats counters (compatibility for tests)."""
+        """Update aggregate stats counters."""
         self.stats["total_requests"] = int(self.stats.get("total_requests", 0)) + 1
         if success:
             self.stats["successful_requests"] = (

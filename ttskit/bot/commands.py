@@ -78,13 +78,13 @@ class CommandRegistry:
     async def dispatch(self, message: TelegramMessage, text_or_bot: Any) -> bool:
         """Dispatches the message to the appropriate command handler.
 
-        Handles cases where tests pass the bot as the second argument instead of text.
+        Handles cases where callers pass the bot as the second argument instead of text.
         Performs admin checks if the command is admin-only.
         Extracts args after the command prefix.
 
         Args:
             message: The TelegramMessage object.
-            text_or_bot: Either the message text or the bot instance (for tests).
+            text_or_bot: Either the message text or the bot instance.
 
         Returns:
             bool: True if a handler was found and executed, False otherwise.

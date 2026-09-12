@@ -172,7 +172,7 @@ class GTTSEngine(TTSEngine):
         Returns:
             List of voice names (empty for gTTS)
         """
-        # Provide a minimal non-empty voice list for tests
+        # Provide canonical synthetic voice identifier for gTTS default speaker
         lang = lang or self.default_lang
         gtts_lang = self.LANGUAGE_MAP.get(lang, "en")
         return [f"gtts-{gtts_lang}-default"]
@@ -186,7 +186,7 @@ class GTTSEngine(TTSEngine):
         return self._available
 
     def set_available(self, available: bool) -> None:
-        """Set engine availability (for testing).
+        """Set engine availability status.
 
         Args:
             available: Whether engine is available

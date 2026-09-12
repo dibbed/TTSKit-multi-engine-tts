@@ -149,7 +149,7 @@ class AdapterFactory:
         """
         return list(self._get_adapters().keys())
 
-    # Expose enum on factory for tests referencing adapter_factory.AdapterType
+    # Expose enum on factory class for direct caller convenience
     AdapterType = AdapterType
 
     def get_adapter_info(self, adapter_type: AdapterType) -> dict[str, Any] | None:

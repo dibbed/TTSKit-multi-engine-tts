@@ -376,7 +376,7 @@ class AudioManager:
         self._save_cache_index()
 
     def _save_to_cache_compat(self, cache_key: str, audio_data: bytes) -> None:
-        """Backward-compatible save for tests using 2 arguments.
+        """Backward-compatible save using default ogg format and minimal metadata.
 
         Calls _save_to_cache with 'ogg' format and minimal metadata.
 

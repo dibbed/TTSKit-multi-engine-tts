@@ -262,7 +262,7 @@ class EdgeEngine(TTSEngine):
         return list(VOICE_BY_LANG.values())
 
     def _get_voice_for_language(self, lang: str) -> str:
-        """Get voice for a language (backward-compatible for tests).
+        """Get voice for a language.
 
         Args:
             lang: Language code (e.g., 'en').

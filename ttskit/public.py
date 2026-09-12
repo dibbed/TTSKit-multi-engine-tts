@@ -141,7 +141,7 @@ class TTS:
 
         self.router = SmartRouter(engine_registry)
         self.smart_router = self.router
-        self.stats = self.router.stats  # Expose stats for tests
+        self.stats = self.router.stats  # Expose router stats
         self._setup_engines()
 
     def _setup_engines(self) -> None:
@@ -407,9 +407,9 @@ class TTS:
         engines_info = engine_factory.get_all_engines_info()
         return list(engines_info.values())
 
-    # --- Preferences (stubs for tests) ---
+    # --- Preferences ---
     def set_engine_preferences(self, preferences: dict[str, Any]) -> None:
-        """Stub for setting engine prefs (used in testing).
+        """Set engine preferences.
 
         Args:
             preferences: Dict of preferences.
