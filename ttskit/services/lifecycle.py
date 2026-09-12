@@ -61,7 +61,7 @@ class ProcessLifecycleManager:
 
     def is_restart_supported(self) -> bool:
         """Check if restart is supported in the current environment."""
-        return self.detect_mode() == LifecycleMode.SUPERVISED or hasattr(os, "execv")
+        return self.detect_mode() == LifecycleMode.SUPERVISED
 
     async def run_shutdown_hooks(self) -> None:
         """Execute all registered shutdown hooks safely."""
@@ -79,12 +79,13 @@ class ProcessLifecycleManager:
     async def request_restart(
         self,
         grace_period_seconds: float = 0.5,
-        use_execv_fallback: bool = True,
+        use_execv_fallback: bool = False,
     ) -> dict[str, Any]:
         """Request a process restart.
 
         Under a supervisor, shuts down gracefully with exit code 0 to allow supervisor restart.
-        In standalone mode, falls back to os.execv if available, or returns unsupported status.
+        In standalone mode without an external supervisor, returns unsupported status
+        unless explicit execv fallback is enabled.
         """
         mode = self.detect_mode()
         logger.info(f"Process restart requested in mode: {mode}")
@@ -122,7 +123,7 @@ class ProcessLifecycleManager:
         return {
             "supported": False,
             "mode": mode.value,
-            "message": "Restart is unavailable without a process supervisor or execv support",
+            "message": "Restart is unavailable without a process supervisor",
         }
 
     async def request_shutdown(self, grace_period_seconds: float = 0.5) -> dict[str, Any]:

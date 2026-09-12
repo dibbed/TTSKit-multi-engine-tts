@@ -106,3 +106,29 @@ async def test_request_shutdown():
     assert res["supported"] is True
     assert called == ["hook"]
     exit_handler.assert_called_once_with(0)
+
+
+@pytest.mark.asyncio
+async def test_is_restart_supported_and_default_standalone_rejection(monkeypatch):
+    """Verify is_restart_supported and default request_restart reject unmanaged standalone mode."""
+    monkeypatch.delenv("TTSKIT_SUPERVISED", raising=False)
+    monkeypatch.delenv("SUPERVISED_MODE", raising=False)
+    monkeypatch.delenv("INVOCATION_ID", raising=False)
+    monkeypatch.delenv("JOURNAL_STREAM", raising=False)
+    monkeypatch.delenv("SUPERVISOR_ENABLED", raising=False)
+    monkeypatch.delenv("KUBERNETES_SERVICE_HOST", raising=False)
+
+    exit_handler = MagicMock()
+    mgr = ProcessLifecycleManager(exit_handler=exit_handler)
+    assert mgr.is_restart_supported() is False
+
+    # Default call without arguments must NOT trigger exit handler or report supported
+    res = await mgr.request_restart()
+    assert res["supported"] is False
+    assert "supervisor" in res["message"]
+    exit_handler.assert_not_called()
+
+    # Under supervisor, is_restart_supported is True
+    monkeypatch.setenv("SUPERVISED_MODE", "true")
+    assert mgr.is_restart_supported() is True
+

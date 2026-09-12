@@ -1979,8 +1979,9 @@ async def admin_restart_system(bot, message: TelegramMessage, _: str) -> None:
         from ..services.lifecycle import lifecycle_manager
 
         res = await lifecycle_manager.request_restart(grace_period_seconds=0.0)
-        if not res.get("supported") or hasattr(os, "execv"):
-            os.execv(sys.executable, [sys.executable] + sys.argv)  # noqa: S606
+        if not res.get("supported"):
+            msg = f"⚠️ {res.get('message', 'Restart is unavailable without a process supervisor')}"
+            await bot.awaitable(bot.adapter.send_message)(chat_id, msg)
     except Exception as e:
         chat_id = getattr(message, "chat_id", None) or (
             message.get("chat_id") if hasattr(message, "get") else None
