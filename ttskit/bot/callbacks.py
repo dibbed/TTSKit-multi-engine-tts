@@ -867,31 +867,30 @@ async def cancel_clear_cache_callback(bot, message, data):
 
 # System management callbacks
 async def confirm_restart_callback(bot, message, data):
-    """Confirms and initiates a system restart for the bot.
-
-    Sends 'restarting' message, executes restart logic (placeholder for deployment-specific
-    commands like systemctl or docker restart), then sends completion message.
-
-    Args:
-        bot: The bot instance for sending messages.
-        message: The message object triggering the callback.
-        data: The callback data (unused here).
-
-    Notes:
-        Restart is a placeholder—implement actual logic (e.g., os.system('systemctl restart ttskit')).
-        Handles errors with Persian message. No return value; side effect is system restart.
-    """
+    """Confirms and initiates a system restart for the bot."""
     try:
         await bot.awaitable(bot.adapter.send_message)(message.chat_id, t("restarting"))
 
-        await bot.awaitable(bot.adapter.send_message)(
-            message.chat_id, t("restart_complete")
-        )
+        from ..services.lifecycle import lifecycle_manager
+
+        res = await lifecycle_manager.request_restart(grace_period_seconds=0.5)
+        if res.get("supported", True):
+            await bot.awaitable(bot.adapter.send_message)(
+                message.chat_id, t("restart_complete")
+            )
+        else:
+            await bot.awaitable(bot.adapter.send_message)(
+                message.chat_id, f"⚠️ {res.get('message')}"
+            )
 
     except Exception as e:
-        await bot.awaitable(bot.adapter.send_message)(
-            message.chat_id, f"❌ خطا در ریستارت: {str(e)}"
-        )
+        logger.error(f"Error during restart: {e}")
+        try:
+            await bot.awaitable(bot.adapter.send_message)(
+                message.chat_id, f"❌ خطا در ریستارت: {str(e)}"
+            )
+        except Exception:
+            pass
 
 
 async def cancel_restart_callback(bot, message, data):

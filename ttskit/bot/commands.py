@@ -693,6 +693,16 @@ class CommandRegistry:
             except Exception:
                 bot.adapter.send_message(message.chat_id, t("restarting"))
 
+            from ..services.lifecycle import lifecycle_manager
+
+            res = await lifecycle_manager.request_restart(grace_period_seconds=0.5)
+            if not res.get("supported"):
+                msg = f"⚠️ {res.get('message', 'Restart unsupported')}"
+                try:
+                    await bot.awaitable(bot.adapter.send_message)(message.chat_id, msg)
+                except Exception:
+                    bot.adapter.send_message(message.chat_id, msg)
+
         async def admin_shutdown(message: TelegramMessage, _: str) -> None:
             """Handles /shutdown command to shut down the bot.
 
@@ -711,6 +721,10 @@ class CommandRegistry:
                 )
             except Exception:
                 bot.adapter.send_message(message.chat_id, t("shutting_down"))
+
+            from ..services.lifecycle import lifecycle_manager
+
+            await lifecycle_manager.request_shutdown(grace_period_seconds=0.5)
 
         self.register("/restart", admin_restart, admin_only=True)
         self.register("/shutdown", admin_shutdown, admin_only=True)
@@ -1898,9 +1912,9 @@ async def admin_clear_cache(bot, message: TelegramMessage, _: str) -> None:
 
 
 async def admin_restart_system(bot, message: TelegramMessage, _: str) -> None:
-    """Handles system restart via execv.
+    """Handles system restart via lifecycle manager and execv.
 
-    Stops bot, restarts process; global version for binding.
+    Stops bot, runs hooks, restarts process; global version for binding.
 
     Args:
         bot: The bot instance.
@@ -1922,7 +1936,12 @@ async def admin_restart_system(bot, message: TelegramMessage, _: str) -> None:
         except Exception:
             pass
         await asyncio.sleep(0.5)
-        os.execv(sys.executable, [sys.executable] + sys.argv)
+
+        from ..services.lifecycle import lifecycle_manager
+
+        res = await lifecycle_manager.request_restart(grace_period_seconds=0.0)
+        if not res.get("supported") or hasattr(os, "execv"):
+            os.execv(sys.executable, [sys.executable] + sys.argv)
     except Exception as e:
         chat_id = getattr(message, "chat_id", None) or (
             message.get("chat_id") if hasattr(message, "get") else None
@@ -1933,7 +1952,7 @@ async def admin_restart_system(bot, message: TelegramMessage, _: str) -> None:
 
 
 async def admin_shutdown_system(bot, message: TelegramMessage, _: str) -> None:
-    """Handles system shutdown via os._exit.
+    """Handles system shutdown via lifecycle manager.
 
     Stops bot, exits process; global version for binding.
 
@@ -1955,6 +1974,10 @@ async def admin_shutdown_system(bot, message: TelegramMessage, _: str) -> None:
         except Exception:
             pass
         await asyncio.sleep(0.5)
+
+        from ..services.lifecycle import lifecycle_manager
+
+        await lifecycle_manager.request_shutdown(grace_period_seconds=0.0)
         os._exit(0)
     except Exception as e:
         chat_id = getattr(message, "chat_id", None) or (
