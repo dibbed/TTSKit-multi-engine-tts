@@ -194,10 +194,14 @@ class RedisCache(BaseCache):
         else:
             pattern = f"{self.key_prefix}*"
             keys_to_delete = []
-            if hasattr(client, "scan_iter"):
+            if hasattr(client, "scan_iter") and callable(client.scan_iter):
                 try:
-                    for k in client.scan_iter(match=pattern):
-                        keys_to_delete.append(k)
+                    scan_res = client.scan_iter(match=pattern)
+                    if hasattr(scan_res, "__iter__"):
+                        for k in scan_res:
+                            keys_to_delete.append(k)
+                    elif hasattr(client, "keys"):
+                        keys_to_delete = client.keys(pattern)
                 except Exception as e:
                     logger.warning(f"Error scanning keys for clear: {e}")
             elif hasattr(client, "keys"):
@@ -208,7 +212,8 @@ class RedisCache(BaseCache):
 
             if keys_to_delete:
                 try:
-                    client.delete(*keys_to_delete)
+                    for i in range(0, len(keys_to_delete), 500):
+                        client.delete(*keys_to_delete[i : i + 500])
                 except Exception as e:
                     logger.warning(f"Error deleting keys in clear: {e}")
 
@@ -242,10 +247,18 @@ class RedisCache(BaseCache):
         client = self._get_client()
         pattern = f"{self.key_prefix}*" if self.key_prefix else "*"
         try:
-            if hasattr(client, "scan_iter") and self.key_prefix:
-                raw_keys = list(client.scan_iter(match=pattern))
-            else:
+            if hasattr(client, "scan_iter") and callable(client.scan_iter):
+                scan_res = client.scan_iter(match=pattern)
+                if hasattr(scan_res, "__iter__"):
+                    raw_keys = list(scan_res)
+                elif hasattr(client, "keys"):
+                    raw_keys = client.keys(pattern)
+                else:
+                    raw_keys = []
+            elif hasattr(client, "keys"):
                 raw_keys = client.keys(pattern)
+            else:
+                raw_keys = []
         except Exception as e:
             logger.warning(f"Error getting keys: {e}")
             return []

@@ -880,3 +880,39 @@ class TestRedisCache:
         with patch("ttskit.cache.redis.REDIS_AVAILABLE", False):
             with pytest.raises(ImportError, match="Redis package not installed"):
                 RedisCache()
+
+    def test_keys_uses_scan_iter_even_without_prefix(self):
+        """Verify scan_iter is called rather than blocking keys() even with empty prefix."""
+        with patch("ttskit.cache.redis.redis.Redis") as mock_redis_class:
+            mock_client = Mock()
+            mock_client.ping.return_value = True
+            mock_client.scan_iter.return_value = [b"k1", b"k2"]
+            mock_redis_class.from_url.return_value = mock_client
+
+            cache = RedisCache(key_prefix="")
+            res = cache.keys()
+            assert res == ["k1", "k2"]
+            mock_client.scan_iter.assert_called_once_with(match="*")
+            mock_client.keys.assert_not_called()
+
+    def test_clear_batches_key_deletions(self):
+        """Verify clear deletes large key sets in batches."""
+        with patch("ttskit.cache.redis.redis.Redis") as mock_redis_class:
+            mock_client = Mock()
+            mock_client.ping.return_value = True
+            # Simulate 1200 keys found
+            mock_client.scan_iter.return_value = [f"ttskit:{i}".encode() for i in range(1200)]
+            mock_redis_class.from_url.return_value = mock_client
+
+            cache = RedisCache(key_prefix="ttskit:", dedicated_db=False)
+            cache.clear()
+
+            # 1200 keys split into batches of 500 = 3 delete calls (500, 500, 200)
+            assert mock_client.delete.call_count == 3
+            first_batch = mock_client.delete.call_args_list[0][0]
+            assert len(first_batch) == 500
+            second_batch = mock_client.delete.call_args_list[1][0]
+            assert len(second_batch) == 500
+            third_batch = mock_client.delete.call_args_list[2][0]
+            assert len(third_batch) == 200
+
