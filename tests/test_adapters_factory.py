@@ -8,7 +8,7 @@ from unittest.mock import patch
 
 import pytest
 
-from ttskit.adapters.factory import *
+from ttskit.adapters.factory import AdapterType, check_dependencies, factory
 
 
 class TestAdaptersFactory:

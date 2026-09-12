@@ -139,27 +139,25 @@ select = [
     "T20", # flake8-print
 ]
 ignore = [
-    "E501", # line too long, handled by black
+    "E501", # line too long, handled by ruff format
     "B008", # do not perform function calls in argument defaults
     "C901", # too complex
     "S101", # assert used
-    "T201", # print found
-    "E402", # module level import not at top of file (for examples)
-    "S105", # possible hardcoded password (for tests)
-    "S106", # possible hardcoded password (for tests)
-    "S108", # probable insecure usage of temporary file (for tests)
-    "S110", # try-except-pass detected (for error handling)
-    "S112", # try-except-continue detected (for error handling)
-    "S603", # subprocess call (for system commands)
-    "S104", # possible binding to all interfaces (for API)
+    "S110", # try-except-pass detected (for cleanup and error handling)
+    "S112", # try-except-continue detected (for cleanup and error handling)
+    "S108", # probable insecure usage of temporary file
+    "S603", # subprocess call
+    "S104", # possible binding to all interfaces
 ]
 
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]
-"tests/**/*" = ["B011", "S101", "S105", "S106", "S108", "B017", "F811", "S102", "E721", "B007", "F401", "N806", "F403", "N805", "E741"]
-"examples/**/*" = ["T201", "E402", "F401", "S311"]  # print found, import after path setup, unused test imports, pseudo-random in examples
+"tests/**/*" = ["B011", "S101", "S105", "S106", "S108", "B017", "F811", "S102", "E721", "B007", "F401", "N806", "F403", "N805", "E741", "T201"]
+"examples/**/*" = ["T201", "E402", "F401", "S311", "S106"]  # print found, import after path setup, unused test imports, pseudo-random, mock tokens
 ".github/**/*" = ["S607", "T201"]
-"ttskit_cli/**/*" = ["S603", "S104"]  # subprocess calls, binding to all interfaces
+"ttskit_cli/**/*" = ["S603", "S104", "T201", "E402"]
+"ttskit/database/migration.py" = ["T201"]
+"setup_system.py" = ["T201"]
 
 [tool.mypy]
 python_version = "3.12"

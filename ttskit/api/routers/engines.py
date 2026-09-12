@@ -11,11 +11,10 @@ from pydantic import BaseModel, Field
 from ...engines.factory import factory as engine_factory
 from ...engines.registry import registry as engine_registry
 from ...public import get_engine_capabilities, get_engines
-
-engine_factory.setup_registry(engine_registry)
 from ...utils.logging_config import get_logger
 from ..dependencies import OptionalAuth
 
+engine_factory.setup_registry(engine_registry)
 logger = get_logger(__name__)
 
 router = APIRouter(prefix="/api/v1", tags=["engines"])

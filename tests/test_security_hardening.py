@@ -48,7 +48,9 @@ def test_cors_and_host_secure_defaults():
 async def test_auth_enabled_rejects_missing_credentials(monkeypatch):
     """When enable_auth is True, missing credentials must return None (401 at require_auth)."""
     monkeypatch.setattr("ttskit.api.dependencies.settings.enable_auth", True)
-    monkeypatch.setattr("ttskit.api.dependencies.settings.api_keys", {"admin": "secure-admin-pass"})
+    monkeypatch.setattr(
+        "ttskit.api.dependencies.settings.api_keys", {"admin": "secure-admin-pass"}
+    )
 
     result = await verify_api_key(None, db=MagicMock())
     assert result is None
@@ -62,7 +64,9 @@ async def test_auth_enabled_rejects_missing_credentials(monkeypatch):
 async def test_auth_enabled_rejects_invalid_credentials(monkeypatch, caplog):
     """When enable_auth is True, invalid credentials raise 401 and never log secrets."""
     monkeypatch.setattr("ttskit.api.dependencies.settings.enable_auth", True)
-    monkeypatch.setattr("ttskit.api.dependencies.settings.api_keys", {"admin": "secure-admin-pass"})
+    monkeypatch.setattr(
+        "ttskit.api.dependencies.settings.api_keys", {"admin": "secure-admin-pass"}
+    )
 
     secret_attempt = "super_secret_unmatched_key_12345"
     with caplog.at_level(logging.WARNING):
@@ -113,7 +117,9 @@ async def test_permission_enforcement():
         await require_admin_permission(writer_auth)
     assert exc_admin.value.status_code == 403
 
-    admin_auth = APIKeyAuth(user_id="admin", permissions=["read", "write", "admin"], is_admin=True)
+    admin_auth = APIKeyAuth(
+        user_id="admin", permissions=["read", "write", "admin"], is_admin=True
+    )
     ok_admin = await require_admin_permission(admin_auth)
     assert ok_admin == admin_auth
 
@@ -144,14 +150,18 @@ def test_cors_wildcard_disallows_credentials(monkeypatch):
 
     # Find the added CORSMiddleware
     cors_mw = next(m for m in test_app.user_middleware if m.cls == CORSMiddleware)
-    assert cors_mw.kwargs["allow_credentials"] is False, "Wildcard CORS must have allow_credentials=False"
+    assert cors_mw.kwargs["allow_credentials"] is False, (
+        "Wildcard CORS must have allow_credentials=False"
+    )
 
 
 @pytest.mark.asyncio
 async def test_verify_api_key_does_not_retain_plaintext_secret(monkeypatch):
     """Verify that verify_api_key does not retain the plaintext API key in APIKeyAuth."""
     monkeypatch.setattr("ttskit.api.dependencies.settings.enable_auth", True)
-    monkeypatch.setattr("ttskit.api.dependencies.settings.api_keys", {"admin": "test-secret-key-12345"})
+    monkeypatch.setattr(
+        "ttskit.api.dependencies.settings.api_keys", {"admin": "test-secret-key-12345"}
+    )
 
     auth = await verify_api_key("test-secret-key-12345", db=MagicMock())
     assert auth is not None
@@ -162,15 +172,19 @@ async def test_verify_api_key_does_not_retain_plaintext_secret(monkeypatch):
 def test_users_me_masks_key_without_leaking_fragment():
     """Verify that /admin/users/me returns masked '***' and never leaks secret fragments."""
     from unittest.mock import AsyncMock, patch
+
     from fastapi import FastAPI
-    from ttskit.api.routers.admin import router
+
     from ttskit.api.dependencies import require_write_permission
+    from ttskit.api.routers.admin import router
 
     app = FastAPI()
     app.include_router(router)
 
     # 1. Test when user is in database
-    mock_auth = APIKeyAuth(user_id="alice", permissions=["read", "write", "admin"], is_admin=True)
+    mock_auth = APIKeyAuth(
+        user_id="alice", permissions=["read", "write", "admin"], is_admin=True
+    )
     app.dependency_overrides[require_write_permission] = lambda: mock_auth
 
     with patch("ttskit.api.routers.admin.UserService") as mock_service_cls:
@@ -204,19 +218,25 @@ def test_users_me_masks_key_without_leaking_fragment():
 def test_admin_endpoints_sanitize_500_exceptions():
     """Verify that unexpected exceptions do not leak raw exception text to clients."""
     from unittest.mock import AsyncMock, patch
+
     from fastapi import FastAPI
-    from ttskit.api.routers.admin import router
+
     from ttskit.api.dependencies import require_write_permission
+    from ttskit.api.routers.admin import router
 
     app = FastAPI()
     app.include_router(router)
 
-    mock_auth = APIKeyAuth(user_id="admin", permissions=["read", "write", "admin"], is_admin=True)
+    mock_auth = APIKeyAuth(
+        user_id="admin", permissions=["read", "write", "admin"], is_admin=True
+    )
     app.dependency_overrides[require_write_permission] = lambda: mock_auth
 
     with patch("ttskit.api.routers.admin.UserService") as mock_service_cls:
         mock_service = MagicMock()
-        mock_service.get_all_users = AsyncMock(side_effect=RuntimeError("SECRET_INTERNAL_DB_CRASH_INFO"))
+        mock_service.get_all_users = AsyncMock(
+            side_effect=RuntimeError("SECRET_INTERNAL_DB_CRASH_INFO")
+        )
         mock_service_cls.return_value = mock_service
 
         client = TestClient(app)
@@ -230,7 +250,9 @@ def test_ttskit_prefixed_environment_variables(monkeypatch):
     """Verify that TTSKIT_ prefixed environment variables configure Settings properly."""
     from ttskit.config import Settings
 
-    monkeypatch.setenv("TTSKIT_BOT_TOKEN", "123456789:ABCdefGHIjklMNOpqrsTUVwxyz123456789")
+    monkeypatch.setenv(
+        "TTSKIT_BOT_TOKEN", "123456789:ABCdefGHIjklMNOpqrsTUVwxyz123456789"
+    )
     monkeypatch.setenv("TTSKIT_RATE_LIMITING", "true")
     monkeypatch.setenv("TTSKIT_CACHE_ENABLED", "false")
     monkeypatch.setenv("TTSKIT_LOG_LEVEL", "warning")
@@ -243,4 +265,3 @@ def test_ttskit_prefixed_environment_variables(monkeypatch):
     assert s.enable_caching is False
     assert s.log_level == "WARNING"
     assert s.api_port == 9090
-

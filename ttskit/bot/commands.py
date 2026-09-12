@@ -1962,9 +1962,6 @@ async def admin_restart_system(bot, message: TelegramMessage, _: str) -> None:
 
     """
     try:
-        import os
-        import sys
-
         chat_id = getattr(message, "chat_id", None) or (
             message.get("chat_id") if hasattr(message, "get") else None
         )
