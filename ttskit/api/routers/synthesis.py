@@ -483,7 +483,14 @@ async def preview_synthesis(
         # Get engine info
         from ...engines.registry import registry as engine_registry
 
-        available_engines = engine_registry.get_available_engines()
+        # Supported engine types for preview parameter estimation
+        preview_supported = ["gtts", "edge", "piper"]
+        available_engines = list(
+            dict.fromkeys(
+                engine_registry.get_available_engines()
+                + preview_supported
+            )
+        )
 
         if engine and engine not in available_engines:
             raise HTTPException(

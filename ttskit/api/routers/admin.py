@@ -277,13 +277,13 @@ async def get_current_user(
                 "permissions": auth.permissions,
                 "created_at": user.created_at.isoformat(),
                 "last_login": user.last_login.isoformat() if user.last_login else None,
-                "api_key": "***",
+                "api_key": auth.api_key[:8] + "..." if len(auth.api_key) > 8 else "***",
             }
         else:
             return {
                 "user_id": auth.user_id,
                 "permissions": auth.permissions,
-                "api_key": "***",
+                "api_key": auth.api_key[:8] + "..." if len(auth.api_key) > 8 else "***",
                 "note": "User not found in database, using fallback authentication",
             }
 

@@ -241,7 +241,9 @@ class TestMetricsInitEdgeCases:
             "builtins.__import__", side_effect=ImportError("No module named 'advanced'")
         ):
             with pytest.raises(ImportError):
-                pass
+                from ttskit.metrics import (  # noqa: F401
+                    AdvancedMetricsCollector,
+                )
 
 
 class TestMetricsInitIntegration:

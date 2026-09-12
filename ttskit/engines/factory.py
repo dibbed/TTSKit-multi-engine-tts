@@ -333,6 +333,10 @@ class EngineFactory:
         if name in self.engines:
             return self.engines[name]
         if name not in self.engine_classes:
+            if name == "piper" and not PIPER_AVAILABLE:
+                raise ImportError(
+                    "Piper TTS package not installed. Install with: pip install piper-tts"
+                )
             known_names = {"gtts", "edge", "piper"}
             if name in known_names:
                 return None
@@ -358,6 +362,8 @@ class EngineFactory:
                     logger.warning(f"Failed to set default_lang for {name}: {e}")
             self.engines[name] = engine
             return engine
+        except ImportError:
+            raise
         except Exception:
             return None
 

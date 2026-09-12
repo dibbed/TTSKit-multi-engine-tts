@@ -45,7 +45,7 @@ class PiperEngine(TTSEngine):
         """
         if not PIPER_AVAILABLE:
             raise ImportError(
-                "piper-tts package not installed. Install with: pip install piper-tts"
+                "Piper TTS package not installed. Install with: pip install piper-tts"
             )
 
         super().__init__(default_lang)

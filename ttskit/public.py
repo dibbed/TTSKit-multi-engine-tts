@@ -379,16 +379,22 @@ class TTS:
         voices: list[str] = []
 
         if engine:
-            engine_instance = engine_factory.create_engine(engine)
-            if engine_instance:
-                voices = engine_instance.list_voices(lang)
+            try:
+                engine_instance = engine_factory.create_engine(engine)
+                if engine_instance:
+                    voices = engine_instance.list_voices(lang)
+            except Exception as e:
+                logger.debug(f"Failed to create engine {engine} for voices: {e}")
         else:
             available_engines = engine_factory.get_available_engines()
             for engine_name in available_engines:
-                engine_instance = engine_factory.create_engine(engine_name)
-                if engine_instance:
-                    engine_voices = engine_instance.list_voices(lang)
-                    voices.extend(engine_voices)
+                try:
+                    engine_instance = engine_factory.create_engine(engine_name)
+                    if engine_instance:
+                        engine_voices = engine_instance.list_voices(lang)
+                        voices.extend(engine_voices)
+                except Exception as e:
+                    logger.debug(f"Failed to create engine {engine_name} for voices: {e}")
 
         return list(set(voices))  # Remove duplicates
 
