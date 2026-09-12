@@ -53,10 +53,15 @@ dependencies = [
     "pydantic-settings>=2.3",
     "python-dotenv>=1.0",
 
+    # Database
+    "sqlalchemy>=2.0.0",
+    "aiosqlite>=0.19.0",
+
     # CLI and API
     "typer>=0.12",
     "fastapi>=0.100.0",
     "uvicorn>=0.20.0",
+    "httpx>=0.24.0",
 
     # Caching and storage
     "redis>=4.0.0",
@@ -190,6 +195,10 @@ module = [
     "redis.*",
     "psutil.*",
     "prometheus_client.*",
+    "scipy.*",
+    "piper.*",
+    "asyncio_mqtt.*",
+    "aiosqlite.*",
 ]
 ignore_missing_imports = true
 
