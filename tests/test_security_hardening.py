@@ -14,6 +14,7 @@ from unittest.mock import MagicMock
 
 import pytest
 from fastapi import HTTPException
+from fastapi.testclient import TestClient
 
 from ttskit.api.dependencies import (
     APIKeyAuth,
@@ -144,3 +145,82 @@ def test_cors_wildcard_disallows_credentials(monkeypatch):
     # Find the added CORSMiddleware
     cors_mw = next(m for m in test_app.user_middleware if m.cls == CORSMiddleware)
     assert cors_mw.kwargs["allow_credentials"] is False, "Wildcard CORS must have allow_credentials=False"
+
+
+@pytest.mark.asyncio
+async def test_verify_api_key_does_not_retain_plaintext_secret(monkeypatch):
+    """Verify that verify_api_key does not retain the plaintext API key in APIKeyAuth."""
+    monkeypatch.setattr("ttskit.api.dependencies.settings.enable_auth", True)
+    monkeypatch.setattr("ttskit.api.dependencies.settings.api_keys", {"admin": "test-secret-key-12345"})
+
+    auth = await verify_api_key("test-secret-key-12345", db=MagicMock())
+    assert auth is not None
+    assert auth.user_id == "admin"
+    assert auth.api_key is None, "Plaintext API key must not be retained in APIKeyAuth"
+
+
+def test_users_me_masks_key_without_leaking_fragment():
+    """Verify that /admin/users/me returns masked '***' and never leaks secret fragments."""
+    from unittest.mock import AsyncMock, patch
+    from fastapi import FastAPI
+    from ttskit.api.routers.admin import router
+    from ttskit.api.dependencies import require_write_permission
+
+    app = FastAPI()
+    app.include_router(router)
+
+    # 1. Test when user is in database
+    mock_auth = APIKeyAuth(user_id="alice", permissions=["read", "write", "admin"], is_admin=True)
+    app.dependency_overrides[require_write_permission] = lambda: mock_auth
+
+    with patch("ttskit.api.routers.admin.UserService") as mock_service_cls:
+        mock_service = MagicMock()
+        mock_user = MagicMock()
+        mock_user.user_id = "alice"
+        mock_user.username = "alice"
+        mock_user.email = "alice@example.com"
+        mock_user.is_admin = True
+        mock_user.is_active = True
+        mock_user.created_at.isoformat.return_value = "2026-01-01T00:00:00"
+        mock_user.last_login = None
+        mock_service.get_user_by_id = AsyncMock(return_value=mock_user)
+        mock_service_cls.return_value = mock_service
+
+        client = TestClient(app)
+        res = client.get("/api/v1/admin/users/me")
+        assert res.status_code == 200
+        data = res.json()
+        assert data["api_key"] == "***"
+
+        # 2. Test fallback when user is not in database (e.g. dev-user with api_key=None)
+        mock_service.get_user_by_id = AsyncMock(return_value=None)
+        res2 = client.get("/api/v1/admin/users/me")
+        assert res2.status_code == 200
+        data2 = res2.json()
+        assert data2["api_key"] == "***"
+        assert "note" in data2
+
+
+def test_admin_endpoints_sanitize_500_exceptions():
+    """Verify that unexpected exceptions do not leak raw exception text to clients."""
+    from unittest.mock import AsyncMock, patch
+    from fastapi import FastAPI
+    from ttskit.api.routers.admin import router
+    from ttskit.api.dependencies import require_write_permission
+
+    app = FastAPI()
+    app.include_router(router)
+
+    mock_auth = APIKeyAuth(user_id="admin", permissions=["read", "write", "admin"], is_admin=True)
+    app.dependency_overrides[require_write_permission] = lambda: mock_auth
+
+    with patch("ttskit.api.routers.admin.UserService") as mock_service_cls:
+        mock_service = MagicMock()
+        mock_service.get_all_users = AsyncMock(side_effect=RuntimeError("SECRET_INTERNAL_DB_CRASH_INFO"))
+        mock_service_cls.return_value = mock_service
+
+        client = TestClient(app)
+        res = client.get("/api/v1/admin/users")
+        assert res.status_code == 500
+        assert "SECRET_INTERNAL_DB_CRASH_INFO" not in res.text
+        assert res.json()["detail"] == "Internal server error"

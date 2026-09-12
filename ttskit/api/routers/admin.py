@@ -181,8 +181,8 @@ async def list_users(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Failed to list users: {e}")
-        raise HTTPException(status_code=500, detail=str(e)) from e
+        logger.exception(f"Failed to list users: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error") from e
 
 
 @router.post("/users", response_model=UserInfo)
@@ -238,8 +238,8 @@ async def create_user(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Failed to create user: {e}")
-        raise HTTPException(status_code=500, detail=str(e)) from e
+        logger.exception(f"Failed to create user: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error") from e
 
 
 @router.get("/users/me")
@@ -277,19 +277,19 @@ async def get_current_user(
                 "permissions": auth.permissions,
                 "created_at": user.created_at.isoformat(),
                 "last_login": user.last_login.isoformat() if user.last_login else None,
-                "api_key": auth.api_key[:8] + "..." if len(auth.api_key) > 8 else "***",
+                "api_key": "***",
             }
         else:
             return {
                 "user_id": auth.user_id,
                 "permissions": auth.permissions,
-                "api_key": auth.api_key[:8] + "..." if len(auth.api_key) > 8 else "***",
+                "api_key": "***",
                 "note": "User not found in database, using fallback authentication",
             }
 
     except Exception as e:
-        logger.error(f"Failed to get current user: {e}")
-        raise HTTPException(status_code=500, detail=str(e)) from e
+        logger.exception(f"Failed to get current user: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error") from e
 
 
 @router.get("/users/{user_id}", response_model=UserInfo)
@@ -344,8 +344,8 @@ async def get_user(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Failed to get user: {e}")
-        raise HTTPException(status_code=500, detail=str(e)) from e
+        logger.exception(f"Failed to get user: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error") from e
 
 
 @router.delete("/users/{user_id}")
@@ -397,8 +397,8 @@ async def delete_user(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Failed to delete user: {e}")
-        raise HTTPException(status_code=500, detail=str(e)) from e
+        logger.exception(f"Failed to delete user: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error") from e
 
 
 @router.get("/api-keys", response_model=list[APIKeyInfo])
@@ -436,9 +436,17 @@ async def list_api_keys(
         for user in users:
             user_api_keys = await user_service.get_user_api_keys(user.user_id)
             for api_key in user_api_keys:
-                import json
-
-                permissions = json.loads(api_key.permissions)
+                raw_perms = getattr(api_key, "permissions", ["read", "write"])
+                if isinstance(raw_perms, list):
+                    permissions = raw_perms
+                elif isinstance(raw_perms, str):
+                    try:
+                        import json
+                        permissions = json.loads(raw_perms)
+                    except Exception:
+                        permissions = [raw_perms]
+                else:
+                    permissions = list(raw_perms)
                 api_keys.append(
                     APIKeyInfo(
                         id=api_key.id,
@@ -462,8 +470,8 @@ async def list_api_keys(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Failed to list API keys: {e}")
-        raise HTTPException(status_code=500, detail=str(e)) from e
+        logger.exception(f"Failed to list API keys: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error") from e
 
 
 @router.post("/api-keys", response_model=CreateAPIKeyResponse)
@@ -526,17 +534,23 @@ async def create_api_key(
             expires_at=expires_at,
         )
 
-        if not api_key_data:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Failed to create API key",
-            )
+        raw_perms = api_key_data.get("permissions", ["read", "write"])
+        if isinstance(raw_perms, list):
+            permissions = raw_perms
+        elif isinstance(raw_perms, str):
+            try:
+                import json
+                permissions = json.loads(raw_perms)
+            except Exception:
+                permissions = [raw_perms]
+        else:
+            permissions = list(raw_perms)
 
         return CreateAPIKeyResponse(
             id=api_key_data["id"],
-            user_id=request.user_id,
+            user_id=api_key_data.get("user_id", request.user_id),
             api_key=api_key_data["api_key"],
-            permissions=api_key_data["permissions"],
+            permissions=permissions,
             created_at=api_key_data["created_at"].isoformat(),
             expires_at=api_key_data["expires_at"].isoformat()
             if api_key_data["expires_at"]
@@ -548,8 +562,8 @@ async def create_api_key(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Failed to create API key: {e}")
-        raise HTTPException(status_code=500, detail=str(e)) from e
+        logger.exception(f"Failed to create API key: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error") from e
 
 
 @router.put("/api-keys/{user_id}")
@@ -620,9 +634,17 @@ async def update_api_key(
                 detail=f"API key not found for user '{user_id}'",
             )
 
-        import json
-
-        permissions = json.loads(updated_api_key.permissions)
+        raw_perms = getattr(updated_api_key, "permissions", ["read", "write"])
+        if isinstance(raw_perms, list):
+            permissions = raw_perms
+        elif isinstance(raw_perms, str):
+            try:
+                import json
+                permissions = json.loads(raw_perms)
+            except Exception:
+                permissions = [raw_perms]
+        else:
+            permissions = list(raw_perms)
 
         return APIKeyInfo(
             id=updated_api_key.id,
@@ -643,8 +665,8 @@ async def update_api_key(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Failed to update API key: {e}")
-        raise HTTPException(status_code=500, detail=str(e)) from e
+        logger.exception(f"Failed to update API key: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error") from e
 
 
 @router.delete("/api-keys/{user_id}")
@@ -705,5 +727,5 @@ async def delete_api_key(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Failed to delete API key: {e}")
-        raise HTTPException(status_code=500, detail=str(e)) from e
+        logger.exception(f"Failed to delete API key: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error") from e
