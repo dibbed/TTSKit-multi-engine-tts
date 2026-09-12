@@ -14,6 +14,9 @@ from contextlib import contextmanager
 from pathlib import Path
 
 from ..config import settings
+from .logging_config import get_logger
+
+logger = get_logger(__name__)
 
 
 class TempFileManager:
@@ -144,7 +147,7 @@ class TempFileManager:
                 if os.path.exists(file_path):
                     os.unlink(file_path)
             except Exception as e:
-                print(f"Warning: Failed to delete temp file {file_path}: {e}")
+                logger.warning(f"Failed to delete temp file {file_path}: {e}")
 
         for dir_path in self.created_dirs:
             try:
@@ -203,7 +206,7 @@ class TempFileManager:
                             except Exception:
                                 pass
             except Exception as e:
-                print(f"Warning: Failed to delete temp directory {dir_path}: {e}")
+                logger.warning(f"Failed to delete temp directory {dir_path}: {e}")
 
         self.created_files.clear()
         self.created_dirs.clear()
@@ -295,7 +298,7 @@ def temp_file(suffix: str = "", prefix: str = None) -> Generator[str, None, None
             if os.path.exists(path):
                 os.unlink(path)
         except Exception as e:
-            print(f"Warning: Failed to delete temp file {path}: {e}")
+            logger.warning(f"Failed to delete temp file {path}: {e}")
 
 
 @contextmanager
@@ -354,7 +357,7 @@ def temp_directory(suffix: str = "", prefix: str = None) -> Generator[str, None,
                     except Exception:
                         pass
         except Exception as e:
-            print(f"Warning: Failed to delete temp directory {path}: {e}")
+            logger.warning(f"Failed to delete temp directory {path}: {e}")
 
 
 def cleanup_old_temp_files(max_age: int = 3600) -> int:
@@ -386,11 +389,11 @@ def cleanup_old_temp_files(max_age: int = 3600) -> int:
                         file_path.unlink()
                         cleaned_count += 1
                     except Exception as e:
-                        print(
-                            f"Warning: Failed to delete old temp file {file_path}: {e}"
+                        logger.warning(
+                            f"Failed to delete old temp file {file_path}: {e}"
                         )
     except Exception as e:
-        print(f"Warning: Failed to cleanup temp files: {e}")
+        logger.warning(f"Failed to cleanup temp files: {e}")
 
     return cleaned_count
 
@@ -413,6 +416,6 @@ def get_temp_dir_size() -> int:
             if file_path.is_file():
                 total_size += file_path.stat().st_size
     except Exception as e:
-        print(f"Warning: Failed to calculate temp dir size: {e}")
+        logger.warning(f"Failed to calculate temp dir size: {e}")
 
     return total_size

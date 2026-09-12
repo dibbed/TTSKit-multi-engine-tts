@@ -41,7 +41,10 @@ def check_ffmpeg_available() -> bool:
             check=False,
         )
         return result.returncode == 0
-    except (FileNotFoundError, subprocess.TimeoutExpired, Exception):
+    except (FileNotFoundError, subprocess.TimeoutExpired):
+        return False
+    except Exception as e:
+        logger.warning(f"Unexpected error checking ffmpeg availability: {e}")
         return False
 
 

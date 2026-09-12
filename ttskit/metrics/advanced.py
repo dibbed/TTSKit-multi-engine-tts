@@ -16,6 +16,10 @@ from typing import Any
 import aiofiles
 import psutil
 
+from ..utils.logging_config import get_logger
+
+logger = get_logger(__name__)
+
 
 @dataclass
 class EngineMetrics:
@@ -798,5 +802,5 @@ async def start_metrics_collection(interval_seconds: int = 60):
             await collector.collect_system_metrics()
             await asyncio.sleep(interval_seconds)
         except Exception as e:
-            print(f"Error in metrics collection: {e}")
+            logger.error(f"Error in metrics collection: {e}", exc_info=True)
             await asyncio.sleep(interval_seconds)
