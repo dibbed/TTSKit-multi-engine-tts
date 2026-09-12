@@ -8,6 +8,9 @@ from typing import Any
 
 from ..engines import registry as engines_registry
 from ..utils.i18n import t
+from ..utils.logging_config import get_logger
+
+logger = get_logger(__name__)
 
 CallbackHandler = Callable[[Any, Any, str], Awaitable[Any]]
 
@@ -827,28 +830,32 @@ async def clear_cache_callback(bot, message, data):
 async def confirm_clear_cache_callback(bot, message, data):
     """Confirms and clears the bot's cache upon admin request.
 
-    Executes cache clearing (placeholder for actual implementation, e.g., Redis flushdb).
-    Sends success message; handles errors with Persian message.
+    Executes canonical cache clearing across Redis/memory and audio cache.
+    Sends success message; handles errors with localized message.
 
     Args:
         bot: The bot instance for sending messages.
         message: The message object triggering the callback.
         data: The callback data (unused here).
-
-    Notes:
-        Cache clearing is a placeholder—replace with actual system call (e.g., Redis flushdb).
-        No return value; focuses on side effect of clearing cache.
     """
     try:
+        from ..cache import clear_cache
+
+        clear_cache()
+
         await bot.awaitable(bot.adapter.send_message)(
             message.chat_id,
             t("cache_cleared"),
         )
 
     except Exception as e:
-        await bot.awaitable(bot.adapter.send_message)(
-            message.chat_id, f"❌ خطا در پاک کردن Cache: {str(e)}"
-        )
+        logger.error(f"Error clearing cache: {e}")
+        try:
+            await bot.awaitable(bot.adapter.send_message)(
+                message.chat_id, f"❌ خطا در پاک کردن Cache: {str(e)}"
+            )
+        except Exception:
+            pass
 
 
 async def cancel_clear_cache_callback(bot, message, data):

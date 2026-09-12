@@ -165,9 +165,9 @@ class AudioManager:
         return file_path.exists()
 
     def _get_cache_path(self, cache_key: str, format: str = "ogg") -> Path:
-        """Construct the full path to a cached audio file.
+        """Construct the full path to a cached audio file safely.
 
-        Joins cache_dir with key and format extension.
+        Joins cache_dir with key and format extension, preventing directory traversal.
 
         Args:
             cache_key: Unique cache identifier (str).
@@ -176,7 +176,14 @@ class AudioManager:
         Returns:
             Path: Full path to the cache file.
         """
-        return Path(self.cache_dir) / f"{cache_key}.{format}"
+        safe_key = Path(cache_key).name
+        target = (Path(self.cache_dir) / f"{safe_key}.{format}").resolve()
+        cache_dir_resolved = Path(self.cache_dir).resolve()
+        if not target.is_relative_to(cache_dir_resolved):
+            raise ValueError(
+                f"Invalid cache key or path traversal detected: {cache_key}"
+            )
+        return Path(self.cache_dir) / f"{safe_key}.{format}"
 
     def _is_cache_valid(self, cache_key: str) -> bool:
         """Validate a cache entry by file existence and age.
@@ -609,16 +616,19 @@ class AudioManager:
             return f"{size_bytes / (1024 * 1024 * 1024):.1f} GB"
 
     def clear_cache(self) -> None:
-        """Remove all cached files and clear the index.
+        """Remove all cached files and clear the index safely.
 
-        Deletes all .ogg files in cache_dir (ignores errors),
+        Deletes all .ogg files in cache_dir within directory boundaries (ignores errors),
         clears cache_index, saves empty index, logs success.
 
         Notes:
             Best-effort deletion; skips on exceptions.
         """
+        cache_dir_path = Path(self.cache_dir).resolve()
         for p in Path(self.cache_dir).glob("*.ogg"):
             try:
+                if not p.resolve().is_relative_to(cache_dir_path):
+                    continue
                 p.unlink()
             except Exception:
                 pass
@@ -645,10 +655,13 @@ class AudioManager:
         """
         current_time = time.time()
         max_age = max_age_days * 24 * 3600 if max_age_days else self.max_file_age
+        cache_dir_path = Path(self.cache_dir).resolve()
 
         deleted_count = 0
         for p in Path(self.cache_dir).glob("*.ogg"):
             try:
+                if not p.resolve().is_relative_to(cache_dir_path):
+                    continue
                 file_age = current_time - p.stat().st_mtime
                 if file_age > max_age:
                     p.unlink()
@@ -658,7 +671,15 @@ class AudioManager:
 
         stale_keys: list[str] = []
         for cache_key, entry in list(self.cache_index.items()):
-            file_path = self._get_cache_path(cache_key, entry.get("format", "ogg"))
+            try:
+                file_path = self._get_cache_path(cache_key, entry.get("format", "ogg"))
+                if not file_path.resolve().is_relative_to(cache_dir_path):
+                    stale_keys.append(cache_key)
+                    continue
+            except Exception:
+                stale_keys.append(cache_key)
+                continue
+
             if not file_path.exists():
                 stale_keys.append(cache_key)
                 continue

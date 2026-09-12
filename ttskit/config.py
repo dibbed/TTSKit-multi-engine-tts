@@ -183,6 +183,14 @@ class Settings(BaseSettings):
         default="redis://localhost:6379/0",
         description="Redis URL for caching/rate limiting",
     )
+    redis_key_prefix: str = Field(
+        default="ttskit:cache:",
+        description="Key prefix for Redis caching",
+    )
+    redis_dedicated_db: bool = Field(
+        default=False,
+        description="Whether Redis database is dedicated solely to TTSKit",
+    )
 
     database_url: str | None = Field(
         default=None, description="Database URL (overrides DATABASE_PATH)"

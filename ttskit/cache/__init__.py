@@ -9,9 +9,12 @@ import json
 from typing import Any
 
 from ..config import settings
+from ..utils.logging_config import get_logger
 from .base import CacheInterface
 from .memory import MemoryCache, memory_cache
 from .redis import REDIS_AVAILABLE, RedisCache
+
+logger = get_logger(__name__)
 
 
 def cache_key(text: str, lang: str, engine: str) -> str:
@@ -34,7 +37,10 @@ def cache_key(text: str, lang: str, engine: str) -> str:
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
-def get_cache() -> CacheInterface:
+_redis_cache_instance: RedisCache | None = None
+
+
+def get_cache(force_new: bool = False) -> CacheInterface:
     """Return configured cache backend.
 
     Returns:
@@ -42,11 +48,32 @@ def get_cache() -> CacheInterface:
 
     Notes:
         Prefers Redis if settings.enable_caching, settings.redis_url, and REDIS_AVAILABLE.
+        Reuses RedisCache instance to avoid connection churn.
         Falls back to global memory_cache on exceptions.
     """
+    global _redis_cache_instance
     if settings.enable_caching and settings.redis_url and REDIS_AVAILABLE:
         try:
-            return RedisCache(settings.redis_url)
+            prefix = getattr(settings, "redis_key_prefix", None)
+            dedicated = getattr(settings, "redis_dedicated_db", False)
+            kwargs = {}
+            if prefix and isinstance(prefix, str):
+                kwargs["key_prefix"] = prefix
+            if isinstance(dedicated, bool):
+                kwargs["dedicated_db"] = dedicated
+
+            if (
+                not force_new
+                and _redis_cache_instance is not None
+                and _redis_cache_instance.url == settings.redis_url
+            ):
+                return _redis_cache_instance
+
+            if kwargs:
+                _redis_cache_instance = RedisCache(settings.redis_url, **kwargs)
+            else:
+                _redis_cache_instance = RedisCache(settings.redis_url)
+            return _redis_cache_instance
         except Exception:
             return memory_cache
     return memory_cache
@@ -55,10 +82,16 @@ def get_cache() -> CacheInterface:
 def clear_cache() -> None:
     """Clear all cached data.
 
-    Removes all entries from the active cache backend.
+    Removes all entries from the active cache backend and audio manager disk cache.
     """
     cache = get_cache()
     cache.clear()
+    try:
+        from ..utils.audio_manager import audio_manager
+
+        audio_manager.clear_cache()
+    except Exception as e:
+        logger.debug(f"Failed to clear audio manager cache: {e}")
 
 
 def get_cache_stats() -> dict[str, Any]:

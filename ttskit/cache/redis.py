@@ -28,6 +28,8 @@ class RedisCache(BaseCache):
         redis_url: str | None = None,
         url: str | None = None,
         default_ttl: int = 3600,
+        key_prefix: str = "",
+        dedicated_db: bool = False,
         **kwargs,
     ):
         """Initialize the Redis cache.
@@ -36,6 +38,8 @@ class RedisCache(BaseCache):
             redis_url: Preferred Redis connection URL.
             url: Alternative URL for backward compatibility.
             default_ttl: Default time-to-live in seconds.
+            key_prefix: Prefix for keys to support shared Redis instances.
+            dedicated_db: Whether Redis DB is dedicated (permitting flushdb).
             **kwargs: Extra parameters passed to the Redis client.
 
         Notes:
@@ -51,6 +55,8 @@ class RedisCache(BaseCache):
         super().__init__(default_ttl)
         self.url = redis_url or url or "redis://localhost:6379/0"
         self.redis_kwargs = kwargs
+        self.key_prefix = key_prefix
+        self.dedicated_db = dedicated_db
         self._client: redis.Redis | None = None
         try:
             self._client = redis.Redis.from_url(self.url, **kwargs)
@@ -58,6 +64,18 @@ class RedisCache(BaseCache):
         except Exception as e:
             logger.warning(f"Redis connection failed: {e}")
             self._client = None
+
+    def _format_key(self, key: str) -> str:
+        """Add namespace prefix to key if configured and not already prefixed."""
+        if self.key_prefix and not key.startswith(self.key_prefix):
+            return f"{self.key_prefix}{key}"
+        return key
+
+    def _strip_key(self, key: str) -> str:
+        """Strip namespace prefix from key if present."""
+        if self.key_prefix and key.startswith(self.key_prefix):
+            return key[len(self.key_prefix) :]
+        return key
 
     def _get_client(self) -> redis.Redis:
         """Get the Redis client, creating it if needed.
@@ -91,7 +109,8 @@ class RedisCache(BaseCache):
             self._record_miss()
             return default
         client = self._get_client()
-        value = client.get(key)
+        full_key = self._format_key(key)
+        value = client.get(full_key)
         if value is not None:
             self._record_hit()
             try:
@@ -140,10 +159,11 @@ class RedisCache(BaseCache):
         else:
             value_to_store = value
 
+        full_key = self._format_key(key)
         ttl_to_use = ttl if ttl is not None else self.default_ttl
-        result = client.set(key, value_to_store)
+        result = client.set(full_key, value_to_store)
         if ttl_to_use is not None:
-            client.expire(key, ttl_to_use)
+            client.expire(full_key, ttl_to_use)
         self._record_set()
         return result
 
@@ -159,7 +179,8 @@ class RedisCache(BaseCache):
         if self._client is None:
             return False
         client = self._get_client()
-        result = client.delete(key)
+        full_key = self._format_key(key)
+        result = client.delete(full_key)
         if result > 0:
             self._record_delete()
         return result > 0
@@ -169,7 +190,28 @@ class RedisCache(BaseCache):
         if self._client is None:
             return
         client = self._get_client()
-        client.flushdb()
+        if self.dedicated_db or not self.key_prefix:
+            client.flushdb()
+        else:
+            pattern = f"{self.key_prefix}*"
+            keys_to_delete = []
+            if hasattr(client, "scan_iter"):
+                try:
+                    for k in client.scan_iter(match=pattern):
+                        keys_to_delete.append(k)
+                except Exception as e:
+                    logger.warning(f"Error scanning keys for clear: {e}")
+            elif hasattr(client, "keys"):
+                try:
+                    keys_to_delete = client.keys(pattern)
+                except Exception as e:
+                    logger.warning(f"Error listing keys for clear: {e}")
+
+            if keys_to_delete:
+                try:
+                    client.delete(*keys_to_delete)
+                except Exception as e:
+                    logger.warning(f"Error deleting keys in clear: {e}")
 
     def exists(self, key: str) -> bool:
         """Check if key exists in Redis cache.
@@ -183,7 +225,8 @@ class RedisCache(BaseCache):
         if self._client is None:
             return False
         client = self._get_client()
-        result = client.exists(key)
+        full_key = self._format_key(key)
+        result = client.exists(full_key)
         return result > 0
 
     def keys(self) -> list[str]:
@@ -198,8 +241,19 @@ class RedisCache(BaseCache):
         if self._client is None:
             return []
         client = self._get_client()
-        keys = client.keys("*")
-        return [key.decode("utf-8") if isinstance(key, bytes) else key for key in keys]
+        pattern = f"{self.key_prefix}*" if self.key_prefix else "*"
+        try:
+            if hasattr(client, "scan_iter") and self.key_prefix:
+                raw_keys = list(client.scan_iter(match=pattern))
+            else:
+                raw_keys = client.keys(pattern)
+        except Exception as e:
+            logger.warning(f"Error getting keys: {e}")
+            return []
+        return [
+            self._strip_key(key.decode("utf-8") if isinstance(key, bytes) else key)
+            for key in raw_keys
+        ]
 
     def size(self) -> int:
         """Get number of cache entries.
@@ -208,12 +262,14 @@ class RedisCache(BaseCache):
             Number of cache entries
 
         Notes:
-            Uses Redis DBSIZE command; returns 0 if no client. Exceptions are allowed to propagate for testing error cases.
+            Uses Redis DBSIZE command or prefix-filtered count.
         """
         if self._client is None:
             return 0
         client = self._get_client()
-        return client.dbsize()
+        if self.dedicated_db or not self.key_prefix:
+            return client.dbsize()
+        return len(self.keys())
 
     def ttl(self, key: str) -> int:
         """Get time to live for a key.
@@ -230,7 +286,8 @@ class RedisCache(BaseCache):
         if self._client is None:
             return -2
         client = self._get_client()
-        return client.ttl(key)
+        full_key = self._format_key(key)
+        return client.ttl(full_key)
 
     def get_stats(self) -> dict[str, Any]:
         """Get cache statistics.
