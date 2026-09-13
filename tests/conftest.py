@@ -239,6 +239,8 @@ def mock_telethon_globally():
     mock_client.disconnect = mock_disconnect
     mock_client.send_message = mock_send_message
     mock_client.send_file = mock_send_file
+    mock_client._build_audio_attribute = Mock(return_value=Mock())
+    mock_client.add_event_handler = Mock()
 
     mock_client_class = MagicMock(return_value=mock_client)
 

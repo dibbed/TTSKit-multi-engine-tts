@@ -78,35 +78,35 @@ class TestAdvancedSynthesisEndpoints:
             "lang": "en",
         }
         response = self.client.post("/api/v1/synth", json=request_data)
-        assert response.status_code != status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert response.status_code != status.HTTP_422_UNPROCESSABLE_CONTENT
 
         request_data = {
             "text": "Hello",
             "rate": 0.1,
         }
         response = self.client.post("/api/v1/synth", json=request_data)
-        assert response.status_code != status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert response.status_code != status.HTTP_422_UNPROCESSABLE_CONTENT
 
         request_data = {
             "text": "Hello",
             "rate": 3.0,
         }
         response = self.client.post("/api/v1/synth", json=request_data)
-        assert response.status_code != status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert response.status_code != status.HTTP_422_UNPROCESSABLE_CONTENT
 
         request_data = {
             "text": "Hello",
             "pitch": 12.0,
         }
         response = self.client.post("/api/v1/synth", json=request_data)
-        assert response.status_code != status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert response.status_code != status.HTTP_422_UNPROCESSABLE_CONTENT
 
         request_data = {
             "text": "Hello",
             "pitch": -12.0,
         }
         response = self.client.post("/api/v1/synth", json=request_data)
-        assert response.status_code != status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert response.status_code != status.HTTP_422_UNPROCESSABLE_CONTENT
 
     def test_synth_with_invalid_values(self):
         """Test synthesis with invalid parameter values."""
@@ -115,42 +115,42 @@ class TestAdvancedSynthesisEndpoints:
             "lang": "en",
         }
         response = self.client.post("/api/v1/synth", json=request_data)
-        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
         request_data = {
             "text": "Hello",
             "rate": 0.05,
         }
         response = self.client.post("/api/v1/synth", json=request_data)
-        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
         request_data = {
             "text": "Hello",
             "rate": 5.0,
         }
         response = self.client.post("/api/v1/synth", json=request_data)
-        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
         request_data = {
             "text": "Hello",
             "pitch": 15.0,
         }
         response = self.client.post("/api/v1/synth", json=request_data)
-        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
         request_data = {
             "text": "Hello",
             "pitch": -15.0,
         }
         response = self.client.post("/api/v1/synth", json=request_data)
-        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
         request_data = {
             "text": "Hello",
             "format": "avi",
         }
         response = self.client.post("/api/v1/synth", json=request_data)
-        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
     def test_synth_with_special_characters(self):
         """Test synthesis with special characters and Unicode."""
@@ -163,7 +163,7 @@ class TestAdvancedSynthesisEndpoints:
         for text in special_texts:
             request_data = {"text": text, "lang": "en"}
             response = self.client.post("/api/v1/synth", json=request_data)
-            assert response.status_code != status.HTTP_422_UNPROCESSABLE_ENTITY
+            assert response.status_code != status.HTTP_422_UNPROCESSABLE_CONTENT
 
     @patch("ttskit.api.routers.synthesis.tts")
     def test_batch_synth_with_mixed_results(self, mock_tts):
@@ -269,7 +269,7 @@ class TestAdvancedEnginesEndpoints:
         response = self.client.get("/api/v1/engines?available_only=invalid")
         assert response.status_code in [
             status.HTTP_200_OK,
-            status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status.HTTP_422_UNPROCESSABLE_CONTENT,
         ]
 
     def test_list_voices_with_filters(self):
@@ -343,7 +343,7 @@ class TestAdvancedEnginesEndpoints:
                 f"/api/v1/engines/{engine}/test",
                 params={"text": text, "language": lang},
             )
-            assert response.status_code != status.HTTP_422_UNPROCESSABLE_ENTITY
+            assert response.status_code != status.HTTP_422_UNPROCESSABLE_CONTENT
 
     def test_engine_info_edge_cases(self):
         """Test engine info with edge cases."""
@@ -473,7 +473,7 @@ class TestAdvancedAdminEndpoints:
         response = self.client.post(
             "/api/v1/admin/api-keys", json=valid_request, headers=headers
         )
-        assert response.status_code != status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert response.status_code != status.HTTP_422_UNPROCESSABLE_CONTENT
 
         invalid_request = {
             "user_id": "",
@@ -484,7 +484,7 @@ class TestAdvancedAdminEndpoints:
             "/api/v1/admin/api-keys", json=invalid_request, headers=headers
         )
         assert response.status_code in [
-            status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status.HTTP_422_UNPROCESSABLE_CONTENT,
             status.HTTP_401_UNAUTHORIZED,
         ]
 
@@ -497,7 +497,7 @@ class TestAdvancedAdminEndpoints:
             "/api/v1/admin/api-keys", json=invalid_request, headers=headers
         )
         assert response.status_code in [
-            status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status.HTTP_422_UNPROCESSABLE_CONTENT,
             status.HTTP_401_UNAUTHORIZED,
         ]
 
@@ -510,7 +510,7 @@ class TestAdvancedAdminEndpoints:
             "/api/v1/admin/api-keys", json=invalid_request, headers=headers
         )
         assert response.status_code in [
-            status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status.HTTP_422_UNPROCESSABLE_CONTENT,
             status.HTTP_401_UNAUTHORIZED,
         ]
 
@@ -523,7 +523,7 @@ class TestAdvancedAdminEndpoints:
             "/api/v1/admin/api-keys", json=invalid_request, headers=headers
         )
         assert response.status_code in [
-            status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status.HTTP_422_UNPROCESSABLE_CONTENT,
             status.HTTP_401_UNAUTHORIZED,
         ]
 
@@ -536,7 +536,7 @@ class TestAdvancedAdminEndpoints:
             "/api/v1/admin/api-keys", json=invalid_request, headers=headers
         )
         assert response.status_code in [
-            status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status.HTTP_422_UNPROCESSABLE_CONTENT,
             status.HTTP_401_UNAUTHORIZED,
         ]
 
@@ -548,14 +548,14 @@ class TestAdvancedAdminEndpoints:
         response = self.client.put(
             "/api/v1/admin/api-keys/test_user", json=valid_request, headers=headers
         )
-        assert response.status_code != status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert response.status_code != status.HTTP_422_UNPROCESSABLE_CONTENT
 
         invalid_request = {"api_key": "short", "permissions": ["read"]}
         response = self.client.put(
             "/api/v1/admin/api-keys/test_user", json=invalid_request, headers=headers
         )
         assert response.status_code in [
-            status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status.HTTP_422_UNPROCESSABLE_CONTENT,
             status.HTTP_401_UNAUTHORIZED,
         ]
 
@@ -564,7 +564,7 @@ class TestAdvancedAdminEndpoints:
             "/api/v1/admin/api-keys/test_user", json=invalid_request, headers=headers
         )
         assert response.status_code in [
-            status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status.HTTP_422_UNPROCESSABLE_CONTENT,
             status.HTTP_401_UNAUTHORIZED,
         ]
 
@@ -583,19 +583,19 @@ class TestAdvancedErrorHandling:
             content='{"text": "hello", "lang": "en"',
             headers={"Content-Type": "application/json"},
         )
-        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
         response = self.client.post(
             "/api/v1/synth", content="{}", headers={"Content-Type": "application/json"}
         )
-        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
         response = self.client.post(
             "/api/v1/synth",
             content='{"text": "hello", "lang": "en",}',
             headers={"Content-Type": "application/json"},
         )
-        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
     def test_unsupported_content_types(self):
         """Test handling of unsupported content types."""
@@ -604,12 +604,12 @@ class TestAdvancedErrorHandling:
             content="<text>hello</text>",
             headers={"Content-Type": "application/xml"},
         )
-        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
         response = self.client.post(
             "/api/v1/synth", content="hello", headers={"Content-Type": "text/plain"}
         )
-        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
     def test_large_request_bodies(self):
         """Test handling of large request bodies."""
@@ -617,14 +617,14 @@ class TestAdvancedErrorHandling:
         request_data = {"text": large_text, "lang": "en"}
 
         response = self.client.post("/api/v1/synth", json=request_data)
-        assert response.status_code != status.HTTP_413_REQUEST_ENTITY_TOO_LARGE
+        assert response.status_code != status.HTTP_413_CONTENT_TOO_LARGE
 
     def test_invalid_query_parameters(self):
         """Test handling of invalid query parameters."""
         response = self.client.get("/api/v1/engines?available_only=maybe")
         assert response.status_code in [
             status.HTTP_200_OK,
-            status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status.HTTP_422_UNPROCESSABLE_CONTENT,
         ]
 
         response = self.client.get("/api/v1/engines?limit=not_a_number")
@@ -1036,7 +1036,7 @@ class TestAdvancedIntegration:
         assert "application/json" in response.headers["content-type"]
 
         response = self.client.post("/api/v1/synth", json={"text": ""})
-        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
         assert "application/json" in response.headers["content-type"]
 
         for resp in [response]:

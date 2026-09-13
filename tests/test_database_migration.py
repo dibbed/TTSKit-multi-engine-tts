@@ -260,6 +260,7 @@ class TestDatabaseMigration:
 
         def fake_run(coro):
             called["count"] += 1
+            coro.close()
             return None
 
         monkeypatch.setattr("ttskit.database.migration.asyncio.run", fake_run)

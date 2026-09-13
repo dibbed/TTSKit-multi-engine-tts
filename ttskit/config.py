@@ -631,7 +631,7 @@ def save_config_to_file(file_path: str, config: Settings) -> None:
             f.write("# TTSKit Configuration File\n")
             f.write("# Generated automatically\n\n")
 
-            for field_name in config.model_fields:
+            for field_name in type(config).model_fields:
                 value = getattr(config, field_name)
                 if value is not None:
                     f.write(f"{field_name}={value}\n")

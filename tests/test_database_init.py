@@ -50,7 +50,11 @@ class TestInitDatabase:
 
     def test_init_database_sync_wrapper_calls_async(self):
         """The sync wrapper must call asyncio.run with the coroutine."""
-        with patch("ttskit.database.init_db.asyncio.run") as mock_run:
+        def fake_run(coro):
+            coro.close()
+            return {}
+
+        with patch("ttskit.database.init_db.asyncio.run", side_effect=fake_run) as mock_run:
             from ttskit.database.init_db import init_database
 
             init_database()
@@ -136,6 +140,7 @@ class TestInitDatabase:
 
         def fake_run(coro):
             called["count"] += 1
+            coro.close()
             return None
 
         monkeypatch.setattr("ttskit.database.init_db.asyncio.run", fake_run)
