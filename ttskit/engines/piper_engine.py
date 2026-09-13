@@ -5,6 +5,7 @@ It's fast, lightweight, and supports multiple languages with local models.
 """
 
 import asyncio
+import io
 import os
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -168,8 +169,20 @@ class PiperEngine(TTSEngine):
         if output_format.lower() == "wav":
             return audio_data
 
-        # For other formats, we need to convert
-        # This will be handled by the audio processing pipeline
+        # For other formats, convert if FFmpeg is available
+        try:
+            from pydub import AudioSegment
+
+            from ..utils.audio import check_ffmpeg_available
+
+            if check_ffmpeg_available():
+                segment = AudioSegment.from_wav(io.BytesIO(audio_data))
+                out_buffer = io.BytesIO()
+                segment.export(out_buffer, format=output_format.lower())
+                return out_buffer.getvalue()
+        except Exception as e:
+            logger.debug("Format conversion to %s failed: %s", output_format, e)
+
         return audio_data
 
     def _find_best_voice(self, lang: str) -> str | None:
@@ -238,6 +251,18 @@ class PiperEngine(TTSEngine):
         temp_manager = TempFileManager(prefix="piper_")
         td = temp_manager.create_temp_dir()
         mp3_path = os.path.join(td, "synth.mp3")
+
+        try:
+            from pydub import AudioSegment
+
+            from ..utils.audio import check_ffmpeg_available
+
+            if check_ffmpeg_available():
+                segment = AudioSegment.from_wav(io.BytesIO(audio_data))
+                segment.export(mp3_path, format="mp3")
+                return mp3_path
+        except Exception as e:
+            logger.debug("Piper WAV-to-MP3 conversion fallback: %s", e)
 
         with open(mp3_path, "wb") as f:
             f.write(audio_data)
@@ -311,50 +336,12 @@ class PiperEngine(TTSEngine):
         return wav_buffer.read()
 
     async def _synth_async_to_wav(self, text: str, voice_name: str) -> str:
-        """Asynchronous synthesis to WAV file.
-
-        Args:
-            text: Text to synthesize
-            voice_name: Voice name
-
-        Returns:
-            Path to WAV file
-        """
-        # Generate audio data (now returns WAV format)
-        audio_data = self._synth_sync_to_bytes(text, voice_name)
-
-        # Save to temporary WAV file
-        temp_manager = TempFileManager(prefix="piper_")
-        td = temp_manager.create_temp_dir()
-        wav_path = os.path.join(td, "synth.wav")
-
-        with open(wav_path, "wb") as f:
-            f.write(audio_data)
-
-        return wav_path
+        """Asynchronous synthesis to WAV file."""
+        return self._synth_sync(text, voice_name)
 
     async def _synth_async_to_mp3(self, text: str, voice_name: str) -> str:
-        """Asynchronous synthesis to MP3 file.
-
-        Args:
-            text: Text to synthesize
-            voice_name: Voice name
-
-        Returns:
-            Path to MP3 file
-        """
-        # Generate audio data (now returns WAV format)
-        audio_data = self._synth_sync_to_bytes(text, voice_name)
-
-        # Save to temporary MP3 file
-        temp_manager = TempFileManager(prefix="piper_")
-        td = temp_manager.create_temp_dir()
-        mp3_path = os.path.join(td, "synth.mp3")
-
-        with open(mp3_path, "wb") as f:
-            f.write(audio_data)
-
-        return mp3_path
+        """Asynchronous synthesis to MP3 file."""
+        return self._synth_sync_to_mp3(text, voice_name)
 
     def get_capabilities(self) -> EngineCapabilities:
         """Get engine capabilities and limitations.
@@ -408,11 +395,7 @@ class PiperEngine(TTSEngine):
         return PIPER_AVAILABLE and self._available and len(self.voices) > 0
 
     def set_available(self, available: bool) -> None:
-        """Set engine availability (for testing).
-
-        Args:
-            available: Whether engine is available
-        """
+        """Set engine availability."""
         self._available = available
 
     def get_model_info(self, model_key: str) -> dict[str, Any] | None:

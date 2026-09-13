@@ -96,8 +96,16 @@ class CommandRegistry:
         text_stripped = str(text_value).strip()
         text_lower = text_stripped.lower()
         bot = text_or_bot if not isinstance(text_or_bot, str) else None
-        for cmd, handler in self._handlers.items():
-            if text_lower.startswith(cmd.lower()):
+        # Sort by length descending to match longer commands before shorter prefix-sharing commands
+        for cmd, handler in sorted(
+            self._handlers.items(), key=lambda item: len(item[0]), reverse=True
+        ):
+            cmd_lower = cmd.lower()
+            if text_lower == cmd_lower or (
+                text_lower.startswith(cmd_lower)
+                and len(text_lower) > len(cmd_lower)
+                and text_lower[len(cmd_lower)] in (" ", "@")
+            ):
                 if self._admin_only.get(cmd, False) and bot is not None:
                     try:
                         user_id = getattr(message, "user", None)
@@ -112,7 +120,12 @@ class CommandRegistry:
                             return False
                     except Exception:
                         return False
-                args = text_stripped[len(cmd) :].strip()
+                remainder = text_stripped[len(cmd) :].strip()
+                if remainder.startswith("@"):
+                    parts = remainder.split(maxsplit=1)
+                    args = parts[1].strip() if len(parts) > 1 else ""
+                else:
+                    args = remainder
                 if handler is not None:
                     try:
                         await handler(message, args)

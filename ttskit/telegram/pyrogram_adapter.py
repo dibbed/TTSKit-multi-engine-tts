@@ -30,7 +30,7 @@ class PyrogramAdapter(TelegramAdapter):
     including authentication, sending media, and basic event routing.
 
     Notes:
-        Requires API ID and hash for initialization; supports injected clients for testing.
+        Requires API ID and hash for initialization; supports injected clients.
         Uses in-memory sessions to avoid file persistence.
     """
 
@@ -47,7 +47,7 @@ class PyrogramAdapter(TelegramAdapter):
             bot_token: The Telegram bot token.
             api_id: Telegram API ID (required unless client provided).
             api_hash: Telegram API hash (required unless client provided).
-            client: Optional pre-existing Pyrogram Client for testing.
+            client: Optional pre-existing Pyrogram Client instance.
 
         Raises:
             ValueError: If required credentials missing without client.
@@ -55,7 +55,7 @@ class PyrogramAdapter(TelegramAdapter):
         super().__init__(bot_token)
         self.api_id = api_id
         self.api_hash = api_hash
-        self.client = client  # Allow injection of client for testing
+        self.client = client  # Allow injecting custom or existing client instance
         self._message_handler = None
         self._callback_handler = None
         self._error_handler = None

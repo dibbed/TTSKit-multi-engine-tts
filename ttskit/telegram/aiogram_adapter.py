@@ -2,7 +2,6 @@
 
 Integrates the Aiogram framework with TTSKit's Telegram interface, handling
 message processing, callbacks, and media sending via asynchronous polling.
-Supports both real bots and mock instances for testing.
 """
 
 from aiogram import Bot, Dispatcher
@@ -29,7 +28,7 @@ class AiogramAdapter(TelegramAdapter):
     error handling and logging.
 
     Notes:
-        Uses in-memory storage for FSM; supports both live bots and mocks for testing.
+        Uses in-memory storage for FSM state.
     """
 
     def __init__(self, bot_token: str):

@@ -152,13 +152,8 @@ class TempFileManager:
         for dir_path in self.created_dirs:
             try:
                 if os.path.exists(dir_path):
-                    try:
-                        shutil.rmtree(dir_path, ignore_errors=True)
-                        if os.path.exists(dir_path):
-                            shutil.rmtree(dir_path)
-                            if os.path.exists(dir_path):
-                                raise RuntimeError("rmtree did not remove dir")
-                    except Exception:
+                    shutil.rmtree(dir_path, ignore_errors=True)
+                    if os.path.exists(dir_path):
                         for root, dirs, files in os.walk(dir_path, topdown=False):
                             for name in files:
                                 try:
@@ -174,48 +169,19 @@ class TempFileManager:
                             os.rmdir(dir_path)
                         except Exception:
                             pass
-                    if os.path.exists(dir_path):
-                        variants = [
-                            dir_path,
-                            os.path.normpath(dir_path),
-                            dir_path.replace("/", os.sep),
-                            dir_path.replace("\\", os.sep),
-                        ]
-                        for v in variants:
-                            try:
-                                if os.path.exists(v):
-                                    shutil.rmtree(v, ignore_errors=True)
-                                    if os.path.exists(v):
-                                        for root, dirs, files in os.walk(
-                                            v, topdown=False
-                                        ):
-                                            for name in files:
-                                                try:
-                                                    os.unlink(os.path.join(root, name))
-                                                except Exception:
-                                                    pass
-                                            for name in dirs:
-                                                try:
-                                                    os.rmdir(os.path.join(root, name))
-                                                except Exception:
-                                                    pass
-                                        try:
-                                            os.rmdir(v)
-                                        except Exception:
-                                            pass
-                            except Exception:
-                                pass
             except Exception as e:
                 logger.warning(f"Failed to delete temp directory {dir_path}: {e}")
 
         self.created_files.clear()
         self.created_dirs.clear()
 
+        # Best-effort sweep of leftover temp items across candidate roots
         try:
             candidate_roots = [Path(tempfile.gettempdir())]
             try:
                 posix_tmp = Path("/tmp")
-                candidate_roots.append(posix_tmp)
+                if posix_tmp.exists():
+                    candidate_roots.append(posix_tmp)
             except Exception:
                 pass
 
@@ -225,17 +191,18 @@ class TempFileManager:
                 "test_dir",
                 "ttskit_test_dir",
             ]
+            if self.prefix and self.prefix not in prefixes:
+                prefixes.append(self.prefix)
+
             for root in candidate_roots:
-                if not root.exists():
-                    continue
                 for prefix in prefixes:
                     try:
                         for p in root.glob(f"{prefix}*"):
                             try:
-                                if p.is_file() and os.path.exists(p):
-                                    p.unlink()
-                                elif p.is_dir() and os.path.exists(p):
-                                    shutil.rmtree(p)
+                                if p.is_file():
+                                    p.unlink(missing_ok=True)
+                                elif p.is_dir():
+                                    shutil.rmtree(p, ignore_errors=True)
                             except Exception:
                                 pass
                     except Exception:

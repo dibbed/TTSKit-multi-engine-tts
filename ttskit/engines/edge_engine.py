@@ -67,7 +67,7 @@ class EdgeEngine(TTSEngine):
             save_timeout_seconds: Timeout in seconds for synthesis save operations.
 
         Note:
-            If edge-tts is not installed, the engine is marked unavailable but can still be constructed for testing.
+            If edge-tts is not installed, the engine is marked unavailable.
         """
         if not EDGE_AVAILABLE:
             super().__init__(default_lang)
@@ -147,7 +147,7 @@ class EdgeEngine(TTSEngine):
 
         Note:
             Rate and pitch parameters are kept for API compatibility but require SSML for actual support.
-            Returns empty bytes if engine is unavailable (e.g., for testing).
+            Returns empty bytes if engine is unavailable.
             Temporary files are auto-cleaned up after reading.
         """
         lang = lang or self.default_lang
@@ -206,7 +206,6 @@ class EdgeEngine(TTSEngine):
 
         Note:
             Uses a temporary directory for the output file and enforces a save timeout.
-            Supports both awaitable and synchronous mocked save calls for testing.
         """
         temp_manager = TempFileManager(prefix="edge_tts_")
         td = temp_manager.create_temp_dir()
@@ -281,7 +280,7 @@ class EdgeEngine(TTSEngine):
         return EDGE_AVAILABLE and self._available
 
     def set_available(self, available: bool) -> None:
-        """Set the engine's availability status (primarily for testing).
+        """Set the engine's availability status.
 
         Args:
             available: True to enable, False to disable the engine.

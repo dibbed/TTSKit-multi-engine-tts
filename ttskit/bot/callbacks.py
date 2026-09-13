@@ -51,20 +51,15 @@ class CallbackRegistry:
     def register_admin(
         self, prefix: Any, handler: CallbackHandler | None = None
     ) -> None:
-        """Registers an admin callback handler or sets up default admin callbacks for testing.
+        """Registers an admin callback handler or sets up default admin callbacks.
 
         If handler is None and prefix is a bot instance (not a string), this method registers
-        a set of default admin callbacks, including placeholders for testing. Otherwise, it registers
-        the provided handler under the specified prefix for admin-only access, adding an extra layer
-        of safety.
+        a set of default admin callbacks. Otherwise, it registers the provided handler under
+        the specified prefix for admin-only access.
 
         Args:
             prefix (str or Any): The callback data prefix, or a bot instance for defaults.
             handler (CallbackHandler | None): The asynchronous handler function, or None for defaults.
-
-        Notes:
-            When setting defaults, placeholder functions are used for some admin callbacks to support
-            testing scenarios.
         """
         if handler is None and prefix is not None and not isinstance(prefix, str):
             async def admin_stats_placeholder(bot, message, data):
