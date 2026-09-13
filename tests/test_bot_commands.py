@@ -357,3 +357,56 @@ class TestCommandRegistry:
             assert result is True
 
         asyncio.run(run_test())
+
+    def test_command_with_mention_argument(self, command_registry, mock_bot, mock_message):
+        """Test that arguments starting with @ are preserved when space-separated."""
+        received_args = []
+
+        async def say_command(message, args):
+            received_args.append(args)
+
+        command_registry.register("/say", say_command)
+        mock_message.text = "/say @alice hello"
+
+        import asyncio
+
+        result = asyncio.run(command_registry.dispatch(mock_message, mock_bot))
+        assert result is True
+        assert received_args == ["@alice hello"]
+
+    def test_command_with_bot_mention(self, command_registry, mock_bot, mock_message):
+        """Test that Telegram bot @username appended to command is stripped properly."""
+        received_args = []
+
+        async def say_command(message, args):
+            received_args.append(args)
+
+        command_registry.register("/say", say_command)
+        mock_message.text = "/say@my_cool_bot hello world"
+
+        import asyncio
+
+        result = asyncio.run(command_registry.dispatch(mock_message, mock_bot))
+        assert result is True
+        assert received_args == ["hello world"]
+
+    def test_command_prefix_precedence(self, command_registry, mock_bot, mock_message):
+        """Test that longer command matches before shorter prefix-sharing command."""
+        executed = []
+
+        async def set_handler(message, args):
+            executed.append("set")
+
+        async def settings_handler(message, args):
+            executed.append("settings")
+
+        command_registry.register("/set", set_handler)
+        command_registry.register("/settings", settings_handler)
+        mock_message.text = "/settings high"
+
+        import asyncio
+
+        result = asyncio.run(command_registry.dispatch(mock_message, mock_bot))
+        assert result is True
+        assert executed == ["settings"]
+

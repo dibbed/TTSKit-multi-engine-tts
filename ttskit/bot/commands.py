@@ -120,12 +120,12 @@ class CommandRegistry:
                             return False
                     except Exception:
                         return False
-                remainder = text_stripped[len(cmd) :].strip()
-                if remainder.startswith("@"):
-                    parts = remainder.split(maxsplit=1)
+                after_cmd = text_stripped[len(cmd) :]
+                if after_cmd.startswith("@"):
+                    parts = after_cmd.split(maxsplit=1)
                     args = parts[1].strip() if len(parts) > 1 else ""
                 else:
-                    args = remainder
+                    args = after_cmd.strip()
                 if handler is not None:
                     try:
                         await handler(message, args)
