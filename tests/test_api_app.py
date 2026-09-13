@@ -130,15 +130,15 @@ class TestSynthesisEndpoints:
         """Test synthesis with validation errors."""
         request_data = {"text": "", "lang": "en"}
         response = self.client.post("/api/v1/synth", json=request_data)
-        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
         request_data = {"text": "Hello", "format": "invalid"}
         response = self.client.post("/api/v1/synth", json=request_data)
-        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
         request_data = {"text": "Hello", "rate": 5.0}
         response = self.client.post("/api/v1/synth", json=request_data)
-        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
     @patch("ttskit.api.routers.synthesis.tts")
     def test_batch_synth_endpoint(self, mock_tts):
@@ -523,7 +523,7 @@ class TestDependencies:
         result = asyncio.run(verify_api_key("test_key", db=MagicMock()))
 
         assert result is not None
-        assert result.api_key == "test_key"
+        assert result.api_key is None
         assert result.user_id == "test_user"
         assert "read" in result.permissions
         assert "write" in result.permissions
@@ -615,7 +615,7 @@ class TestErrorHandling:
             headers={"Content-Type": "application/json"},
         )
 
-        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
         data = response.json()
         assert "detail" in data
 

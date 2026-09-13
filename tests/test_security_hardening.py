@@ -156,8 +156,8 @@ def test_cors_wildcard_disallows_credentials(monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_verify_api_key_authenticates_properly(monkeypatch):
-    """Verify that verify_api_key authenticates and populates APIKeyAuth."""
+async def test_verify_api_key_does_not_retain_plaintext_secret(monkeypatch):
+    """Verify that verify_api_key does not retain the plaintext API key in APIKeyAuth."""
     monkeypatch.setattr("ttskit.api.dependencies.settings.enable_auth", True)
     monkeypatch.setattr(
         "ttskit.api.dependencies.settings.api_keys", {"admin": "test-secret-key-12345"}
@@ -166,7 +166,7 @@ async def test_verify_api_key_authenticates_properly(monkeypatch):
     auth = await verify_api_key("test-secret-key-12345", db=MagicMock())
     assert auth is not None
     assert auth.user_id == "admin"
-    assert auth.api_key == "test-secret-key-12345"
+    assert auth.api_key is None, "Plaintext API key must not be retained in APIKeyAuth"
 
 
 def test_users_me_masks_key_without_leaking_fragment():
