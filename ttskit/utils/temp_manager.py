@@ -188,7 +188,6 @@ class TempFileManager:
             prefixes = [
                 settings.temp_dir_prefix,
                 "ttskit_",
-                "test_dir",
                 "ttskit_test_dir",
             ]
             if self.prefix and self.prefix not in prefixes:

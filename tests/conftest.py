@@ -674,8 +674,17 @@ def mock_prometheus_globally():
 def mock_file_operations_globally():
     """Mock file operations globally for all tests."""
     mock_tempfile = MagicMock()
-    mock_tempfile.mkstemp.return_value = (1, "/tmp/test_file")
-    mock_tempfile.mkdtemp.return_value = "/tmp/test_dir"
+
+    def fake_mkstemp(suffix="", prefix=""):
+        p = prefix or "ttskit_"
+        return (1, f"/tmp/{p}test_file{suffix}")
+
+    def fake_mkdtemp(suffix="", prefix=""):
+        p = prefix or "ttskit_"
+        return f"/tmp/{p}test_dir{suffix}"
+
+    mock_tempfile.mkstemp.side_effect = fake_mkstemp
+    mock_tempfile.mkdtemp.side_effect = fake_mkdtemp
     mock_tempfile.NamedTemporaryFile.return_value.__enter__.return_value = MagicMock()
 
     mock_shutil = MagicMock()

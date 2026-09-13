@@ -70,28 +70,22 @@ class RateLimiter:
 
             user_limit = self._user_limits[user_id]
 
-            # Check if user is blocked
             if user_limit.blocked_until and current_time < user_limit.blocked_until:
                 remaining = int(user_limit.blocked_until - current_time)
                 return False, f"Rate limit exceeded. Try again in {remaining} seconds."
 
-            # Check if window has expired
             if current_time - user_limit.window_start >= self.window_seconds:
-                # Reset window
                 user_limit.requests = 0
                 user_limit.window_start = current_time
                 user_limit.blocked_until = None
 
-            # Check if limit exceeded
             if user_limit.requests >= self.max_requests:
-                # Block user
                 user_limit.blocked_until = current_time + self.block_duration
                 return (
                     False,
                     f"Rate limit exceeded. Blocked for {self.block_duration} seconds.",
                 )
 
-            # Allow request
             user_limit.requests += 1
             remaining = self.max_requests - user_limit.requests
             return (
@@ -123,7 +117,6 @@ class RateLimiter:
 
             user_limit = self._user_limits[user_id]
 
-            # Check if window has expired
             if current_time - user_limit.window_start >= self.window_seconds:
                 return {
                     "requests": 0,

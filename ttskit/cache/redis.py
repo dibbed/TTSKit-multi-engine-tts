@@ -293,7 +293,7 @@ class RedisCache(BaseCache):
             TTL in seconds (-1 for no expiration, -2 if key doesn't exist)
 
         Notes:
-            Returns -2 if no client. Exceptions are allowed to propagate for testing error handling.
+            Returns -2 if Redis client is not initialized.
         """
         if self._client is None:
             return -2

@@ -19,12 +19,16 @@ logger = get_logger(__name__)
 class SmartRouter:
     """Intelligent engine selection and routing system."""
 
-    def __init__(self, registry: EngineRegistry):
+    def __init__(self, registry: EngineRegistry | None = None):
         """Initialize the smart router.
 
         Args:
-            registry: Engine registry instance
+            registry: Optional engine registry instance (uses global registry if None).
         """
+        if registry is None:
+            from .registry import registry as global_registry
+
+            registry = global_registry
         self.registry = registry
         self.performance_metrics: dict[str, list[float]] = {}
         self.failure_counts: dict[str, int] = {}
@@ -94,13 +98,11 @@ class SmartRouter:
         last_error = None
         for engine_name in candidate_engines:
             try:
-                # Check if engine meets requirements
                 if not self.registry.meets_requirements(engine_name, requirements):
                     logger.debug(f"Engine {engine_name} does not meet requirements")
                     continue
 
-                # Get engine instance
-                # Resolve engine instance safely with mock-friendly fallbacks
+                # Resolve engine instance safely with registry fallback
                 try:
                     engine = self.registry.get_engine(engine_name)
                 except Exception:
@@ -114,12 +116,10 @@ class SmartRouter:
                     logger.debug(f"Engine {engine_name} not found in registry")
                     continue
 
-                # Check if engine is available
                 if not engine.is_available():
                     logger.debug(f"Engine {engine_name} is not available")
                     continue
 
-                # Attempt synthesis
                 start_time = time.time()
                 result = engine.synth_async(text, lang, voice, rate, pitch)
                 # Support both async and sync mocked engines in tests
