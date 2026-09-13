@@ -5,6 +5,7 @@ supporting bot tokens, media uploads via send_file, and entity resolution.
 Compatible with TTSKit's async interface.
 """
 
+import asyncio
 from pathlib import Path
 
 from telethon import TelegramClient
@@ -49,6 +50,7 @@ class TelethonAdapter(TelegramAdapter):
         self.api_id = api_id
         self.api_hash = api_hash
         self.client = None  # Will be initialized when needed
+        self._run_task = None
         self._message_handler = None
         self._callback_handler = None
         self._error_handler = None
@@ -75,16 +77,11 @@ class TelethonAdapter(TelegramAdapter):
             self._running = True
 
             # Start receiving updates by running run_until_disconnected in background
-            import asyncio
-
             # Setup message handlers
             self._setup_handlers()
 
-            # Start receiving updates by running run_until_disconnected in background
-
-            # Use get_event_loop() to avoid "already running" error
-            loop = asyncio.get_event_loop()
-            loop.create_task(self.client.run_until_disconnected())
+            # Start receiving updates in background task
+            self._run_task = asyncio.create_task(self.client.run_until_disconnected())
             logger.info("Telethon bot started and receiving updates")
         except Exception as e:
             logger.error(f"Failed to start Telethon bot: {e}")
@@ -99,6 +96,9 @@ class TelethonAdapter(TelegramAdapter):
             Exception: If disconnect fails.
         """
         try:
+            if self._run_task is not None and not self._run_task.done():
+                self._run_task.cancel()
+                self._run_task = None
             if self.client is not None:
                 await self.client.disconnect()
             self._running = False
