@@ -1,4 +1,4 @@
-"""Extra coverage tests for AudioManager without modifying source file."""
+"""Extended behavioral tests for AudioManager caching and file operations."""
 
 import io
 import os

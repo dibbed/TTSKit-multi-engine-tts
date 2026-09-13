@@ -1,9 +1,4 @@
-"""
-Tests for ttskit.metrics.__init__ module.
-
-This module tests all functions and imports in the metrics __init__.py file
-to achieve 100% coverage.
-"""
+"""Tests for ttskit.metrics package initialization and metrics export functions."""
 
 from unittest.mock import patch
 

@@ -1,4 +1,4 @@
-"""Comprehensive tests for Public API to achieve 100% coverage."""
+"""Tests for Public SDK interface, configuration, and convenience functions."""
 
 import asyncio
 import io
@@ -1655,7 +1655,7 @@ class TestErrorHandlingAndEdgeCases:
 
 
 class TestMissingCoverageFunctions:
-    """Tests for functions that were missing from coverage report."""
+    """Tests for TTS client statistics and lifecycle methods."""
 
     def test_tts_reset_stats(self):
         """Test TTS.reset_stats method."""
@@ -1767,7 +1767,7 @@ class TestMissingCoverageFunctions:
 
 
 class TestConvenienceFunctionsMissingCoverage:
-    """Tests for convenience functions that were missing coverage."""
+    """Tests for module-level convenience functions and dispatchers."""
 
     @pytest.mark.asyncio
     async def test_synth_async_function_comprehensive(self):
@@ -1926,7 +1926,7 @@ class TestConvenienceFunctionsMissingCoverage:
 
 
 class TestAdditionalEdgeCases:
-    """Additional edge cases and scenarios for complete coverage."""
+    """Boundary and validation edge case tests for SynthConfig and AudioOut."""
 
     def test_synth_config_edge_cases(self):
         """Test SynthConfig with edge case values."""

@@ -1,4 +1,4 @@
-"""Unit and integration tests verifying Phase 3 security remediation.
+"""Unit and integration tests for API security hardening and authentication policies.
 
 Validates:
 1. No default production secrets exist in Settings.

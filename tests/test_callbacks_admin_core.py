@@ -1,5 +1,4 @@
-"""
-Core admin callback tests for full coverage of callbacks.py.
+"""Tests for administrative callback registration, dispatching, and view rendering.
 
 This file focuses on lightweight paths without heavy dependencies:
 - register_admin with bot instance

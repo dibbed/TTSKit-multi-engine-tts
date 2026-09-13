@@ -1,4 +1,4 @@
-"""Tests for ttskit.database.models.UserSession and APIKey to reach 100% coverage."""
+"""Tests for UserSession and APIKey database models."""
 
 import re
 from datetime import UTC, datetime, timedelta

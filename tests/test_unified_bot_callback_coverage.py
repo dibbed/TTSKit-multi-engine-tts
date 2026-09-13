@@ -1,6 +1,6 @@
-"""Tests for Unified TTS Bot callback coverage.
+"""Tests for UnifiedTTSBot callback dispatch, error routing, and settings handling.
 
-This module tests the callback-related methods that are currently not covered:
+Validates:
 - _handle_callback
 - _handle_error
 - is_sudo
@@ -17,7 +17,7 @@ from ttskit.telegram.base import MessageType, TelegramMessage, TelegramUser
 
 
 class TestUnifiedTTSBotCallbackCoverage:
-    """Test UnifiedTTSBot callback coverage methods."""
+    """Test UnifiedTTSBot callback handling methods."""
 
     @pytest.fixture
     def bot(self):

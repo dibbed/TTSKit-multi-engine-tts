@@ -1,4 +1,4 @@
-"""Comprehensive tests for ttskit.config module with 100% coverage."""
+"""Tests for Settings validation, environment variable parsing, and serialization."""
 
 import os
 import sys

@@ -1,7 +1,7 @@
-"""Test coverage for ttskit/bot/callbacks.py specific functions.
+"""Tests for bot callback registration, dispatching, and handler functions.
 
-Tests for functions with 0% coverage:
-- CallbackRegistry.register_admin.admin_clear
+Validates:
+- CallbackRegistry.register_admin
 - CallbackRegistry.dispatch_admin
 - handle_audio_callback
 - handle_callback_query
@@ -25,10 +25,10 @@ from ttskit.bot.callbacks import (
 
 
 class TestCallbackRegistryAdminCoverage:
-    """Test CallbackRegistry admin functionality for coverage."""
+    """Test CallbackRegistry admin registration and dispatching."""
 
     def test_register_admin_with_bot_instance(self):
-        """Test register_admin with bot instance (admin_clear coverage)."""
+        """Test register_admin with bot instance."""
         registry = CallbackRegistry()
         mock_bot = MagicMock()
 
@@ -41,7 +41,7 @@ class TestCallbackRegistryAdminCoverage:
 
     @pytest.mark.asyncio
     async def test_dispatch_admin_with_sudo_user(self):
-        """Test dispatch_admin with sudo user (full coverage)."""
+        """Test dispatch_admin with authorized sudo user."""
         registry = CallbackRegistry()
 
         admin_keys_handler = AsyncMock()
@@ -129,7 +129,7 @@ class TestCallbackRegistryAdminCoverage:
 
 
 class TestStandaloneCallbackHandlers:
-    """Test standalone callback handler functions for coverage."""
+    """Test standalone callback handler functions."""
 
     @pytest.mark.asyncio
     async def test_handle_audio_callback(self):
@@ -283,7 +283,7 @@ class TestStandaloneCallbackHandlers:
 
 
 class TestCallbackRegistryEdgeCases:
-    """Test edge cases for better coverage."""
+    """Test edge cases and defensive handling in CallbackRegistry."""
 
     @pytest.mark.asyncio
     async def test_dispatch_admin_empty_handlers(self):

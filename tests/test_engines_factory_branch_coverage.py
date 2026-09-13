@@ -1,8 +1,4 @@
-"""
-Comprehensive branch coverage tests for ttskit.engines.factory module.
-
-This module tests all conditional branches and error paths to achieve 100% branch coverage.
-"""
+"""Tests for EngineFactory registration, instance creation, and error paths."""
 
 from unittest.mock import MagicMock, patch
 
@@ -21,7 +17,7 @@ from ttskit.engines.factory import (
 
 
 class TestEngineFactoryBranchCoverage:
-    """Test cases for complete branch coverage in EngineFactory."""
+    """Test cases for EngineFactory registration, lookup, and creation."""
 
     @pytest.fixture
     def factory(self):
@@ -574,7 +570,7 @@ class TestEngineFactoryBranchCoverage:
 
 
 class TestGlobalFunctionsBranchCoverage:
-    """Test cases for global functions branch coverage."""
+    """Test cases for module-level engine creation and utility functions."""
 
     def test_create_engine_success(self):
         """Test successful engine creation via global function."""
@@ -654,7 +650,7 @@ class TestGlobalFunctionsBranchCoverage:
 
 
 class TestEngineFactoryStatisticsBranchCoverage:
-    """Test cases for engine statistics branch coverage."""
+    """Test cases for engine factory metrics and statistics reporting."""
 
     @pytest.fixture
     def factory(self):

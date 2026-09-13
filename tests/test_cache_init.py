@@ -1,9 +1,4 @@
-"""
-Tests for ttskit.cache.__init__ module.
-
-This module tests all functions and imports in the cache __init__.py file
-to achieve 100% coverage.
-"""
+"""Tests for ttskit.cache package initialization, helpers, and factory functions."""
 
 import json
 from unittest.mock import MagicMock, patch

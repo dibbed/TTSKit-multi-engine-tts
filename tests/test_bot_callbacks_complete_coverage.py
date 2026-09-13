@@ -1,7 +1,4 @@
-"""Complete coverage tests for ttskit.bot.callbacks.
-
-This file covers all remaining functions and branches to achieve 100% coverage.
-"""
+"""Behavioral tests for bot callbacks and administrative panels."""
 
 from unittest.mock import AsyncMock, Mock, patch
 
@@ -34,7 +31,7 @@ def make_mock_message(user_id: int = 12345, chat_id: int = 12345) -> Mock:
 
 
 class TestCallbackRegistryComplete:
-    """Test CallbackRegistry for complete coverage."""
+    """Test CallbackRegistry dispatch and error handling."""
 
     def test_callback_registry_init(self):
         """Test CallbackRegistry initialization."""
@@ -471,7 +468,7 @@ class TestStandaloneHandlers:
 
 
 class TestAdminCallbacksComplete:
-    """Test admin callback functions for complete coverage."""
+    """Test administrative callback handlers and metrics display."""
 
     @pytest.mark.asyncio
     async def test_admin_stats_callback_success(self):
@@ -737,7 +734,7 @@ class TestAdminCallbacksComplete:
 
 
 class TestApiKeyCallbacksComplete:
-    """Test API key callback functions for complete coverage."""
+    """Test API key callback handlers and key generation."""
 
     @pytest.mark.asyncio
     async def test_create_key_callback(self):
