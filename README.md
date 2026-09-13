@@ -237,7 +237,7 @@ import asyncio
 from ttskit import SmartRouter, to_opus_ogg
 
 async def process_audio():
-    router = SmartRouter(default_lang="fa")
+    router = SmartRouter()
     
     # تولید صوت با بهترین موتور در دسترس به همراه مدیریت خطای خودکار
     audio_bytes, engine_used = await router.synth_async("سلام بر همگی", lang="fa")

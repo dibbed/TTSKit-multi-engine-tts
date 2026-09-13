@@ -235,10 +235,10 @@ import asyncio
 from ttskit import SmartRouter, to_opus_ogg
 
 async def synthesize_and_convert():
-    router = SmartRouter(default_lang="fa")
+    router = SmartRouter()
     
     # Synthesizes using best engine with automatic fallback
-    audio_bytes, engine_used = await router.synth_async("متن آزمایشی", lang="fa")
+    audio_bytes, engine_used = await router.synth_async("Hello world", lang="en")
     print(f"Synthesized {len(audio_bytes)} bytes using {engine_used}")
     
     # Convert arbitrary audio files to Telegram-compliant Opus OGG
