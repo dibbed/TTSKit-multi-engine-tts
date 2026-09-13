@@ -84,12 +84,15 @@ class SmartRouter:
                 available_engines=self.registry.get_available_engines(),
             )
 
-        # Try selected engine (tests expect raising when none selected)
-        available_engines = [selected_engine]
+        # Candidate engines: selected best engine first, followed by ranked fallbacks
+        candidate_engines = [selected_engine]
+        for engine_candidate in self.get_engine_ranking(lang, requirements):
+            if engine_candidate not in candidate_engines:
+                candidate_engines.append(engine_candidate)
 
         # Try engines in priority order
         last_error = None
-        for engine_name in available_engines:
+        for engine_name in candidate_engines:
             try:
                 # Check if engine meets requirements
                 if not self.registry.meets_requirements(engine_name, requirements):

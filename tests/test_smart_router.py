@@ -296,3 +296,26 @@ class TestSmartRouter:
         assert audio == b"fallback_audio"
         assert name == "gtts"
 
+    def test_synth_async_fallback_to_second_engine(self, smart_router):
+        """Test fallback to secondary engine when primary engine fails."""
+        mock_primary = Mock()
+        mock_primary.is_available.return_value = True
+        mock_primary.synth_async.side_effect = RuntimeError("Primary engine crashed")
+
+        mock_secondary = Mock()
+        mock_secondary.is_available.return_value = True
+        mock_secondary.synth_async.return_value = b"secondary_audio"
+
+        smart_router.registry.get_engine.side_effect = (
+            lambda name: mock_primary if name == "edge" else mock_secondary
+        )
+        smart_router.select_best_engine = Mock(return_value="edge")
+        smart_router.get_engine_ranking = Mock(return_value=["edge", "gtts"])
+        smart_router.registry.meets_requirements.return_value = True
+
+        import asyncio
+
+        audio, name = asyncio.run(smart_router.synth_async("Fallback test", "en"))
+        assert audio == b"secondary_audio"
+        assert name == "gtts"
+
