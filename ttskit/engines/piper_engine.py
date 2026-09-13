@@ -113,16 +113,14 @@ class PiperEngine(TTSEngine):
         if not voice_name:
             raise ValueError(f"No Piper voice found for language: {lang}")
 
-        # Run synthesis in thread pool
+        # Run synthesis in thread pool if event loop is running, or directly if synchronous
         try:
             asyncio.get_running_loop()
-            # If we're already in an event loop, run in thread
             with ThreadPoolExecutor(max_workers=1) as executor:
                 future = executor.submit(self._synth_sync_to_mp3, text, voice_name)
                 return future.result()
         except RuntimeError:
-            # No running loop, safe to use asyncio.run
-            return asyncio.run(self._synth_async_to_mp3(text, voice_name))
+            return self._synth_sync_to_mp3(text, voice_name)
 
     async def synth_async(
         self,
@@ -158,12 +156,11 @@ class PiperEngine(TTSEngine):
         if not voice_name or voice_name not in self.voices:
             raise ValueError(f"No Piper voice found: {voice_name}")
 
-        # Run synthesis in thread pool
+        # Run synthesis in default thread pool executor to avoid blocking the event loop
         loop = asyncio.get_running_loop()
-        with ThreadPoolExecutor(max_workers=1) as executor:
-            audio_data = await loop.run_in_executor(
-                executor, self._synth_sync_to_bytes, text, voice_name, rate, pitch
-            )
+        audio_data = await loop.run_in_executor(
+            None, self._synth_sync_to_bytes, text, voice_name, rate, pitch
+        )
 
         # If output format is WAV, return as-is (already has WAV header)
         if output_format.lower() == "wav":
@@ -337,11 +334,13 @@ class PiperEngine(TTSEngine):
 
     async def _synth_async_to_wav(self, text: str, voice_name: str) -> str:
         """Asynchronous synthesis to WAV file."""
-        return self._synth_sync(text, voice_name)
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, self._synth_sync, text, voice_name)
 
     async def _synth_async_to_mp3(self, text: str, voice_name: str) -> str:
         """Asynchronous synthesis to MP3 file."""
-        return self._synth_sync_to_mp3(text, voice_name)
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(None, self._synth_sync_to_mp3, text, voice_name)
 
     def get_capabilities(self) -> EngineCapabilities:
         """Get engine capabilities and limitations.

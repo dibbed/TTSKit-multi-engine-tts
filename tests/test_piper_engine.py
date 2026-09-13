@@ -6,6 +6,12 @@ import pytest
 
 from ttskit.engines.piper_engine import PIPER_AVAILABLE, PiperEngine
 
+PIPER_MODELS_AVAILABLE = (
+    PIPER_AVAILABLE
+    and Path("./models/piper").exists()
+    and bool(list(Path("./models/piper").glob("*.onnx")))
+)
+
 
 class TestPiperEngine:
     """Test cases for PiperEngine."""
@@ -14,12 +20,16 @@ class TestPiperEngine:
         """Test PIPER_AVAILABLE flag."""
         assert isinstance(PIPER_AVAILABLE, bool)
 
-    @pytest.mark.skipif(not PIPER_AVAILABLE, reason="Piper TTS not available")
+    @pytest.mark.skipif(not PIPER_AVAILABLE, reason="Piper TTS package not installed")
     def test_initialization_with_piper_available(self):
-        """Test engine initialization when Piper is available."""
+        """Test engine initialization when Piper package is available."""
         engine = PiperEngine(default_lang="en")
         assert engine.default_lang == "en"
-        assert engine.is_available()
+        if PIPER_MODELS_AVAILABLE:
+            assert engine.is_available()
+        else:
+            # Without local ONNX voice models, engine correctly reports unavailable
+            assert not engine.is_available()
 
     @pytest.mark.skipif(PIPER_AVAILABLE, reason="Piper TTS is available")
     def test_initialization_without_piper(self):
